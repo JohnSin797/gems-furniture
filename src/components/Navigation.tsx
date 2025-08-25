@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Menu, Search } from "lucide-react";
+import { ShoppingBag, Menu, Search, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Navigation = () => {
   return (
@@ -8,7 +9,9 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-charcoal">Luxe Home</h1>
+            <Link to="/" className="text-2xl font-bold text-charcoal hover:text-sage transition-colors">
+              Luxe Home
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -25,6 +28,9 @@ const Navigation = () => {
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
             <Search className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
+            <Link to="/admin" className="hidden md:flex">
+              <Settings className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
+            </Link>
             <div className="relative">
               <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
               <span className="absolute -top-2 -right-2 bg-sage text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
