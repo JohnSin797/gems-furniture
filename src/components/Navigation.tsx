@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Menu, Search, Settings } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ShoppingBag, Menu, Search, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Navigation = () => {
@@ -14,27 +15,48 @@ const Navigation = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              <a href="#" className="text-foreground hover:text-sage transition-colors">Living Room</a>
-              <a href="#" className="text-foreground hover:text-sage transition-colors">Bedroom</a>
-              <a href="#" className="text-foreground hover:text-sage transition-colors">Dining</a>
-              <a href="#" className="text-foreground hover:text-sage transition-colors">Office</a>
-              <a href="#" className="text-foreground hover:text-sage transition-colors">Sale</a>
+          {/* Search Bar */}
+          <div className="flex-1 max-w-xl mx-8">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search products..."
+                className="w-full pl-10 pr-12"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
-          {/* Right side icons */}
-          <div className="flex items-center space-x-4">
-            <Search className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
-            <Link to="/admin" className="hidden md:flex">
-              <Settings className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
-            </Link>
+          {/* Navigation Items */}
+          <div className="flex items-center space-x-6">
+            <a href="#" className="text-foreground hover:text-sage transition-colors hidden md:block">
+              Products
+            </a>
+            
+            {/* Cart */}
             <div className="relative">
               <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
               <span className="absolute -top-2 -right-2 bg-sage text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
             </div>
+
+            {/* Auth Buttons */}
+            <div className="hidden md:flex items-center space-x-2">
+              <Button variant="ghost" size="sm">
+                Sign In
+              </Button>
+              <Button size="sm">
+                Sign Up
+              </Button>
+            </div>
+
+            {/* Mobile Menu */}
             <Button variant="ghost" size="sm" className="md:hidden">
               <Menu className="h-5 w-5" />
             </Button>
