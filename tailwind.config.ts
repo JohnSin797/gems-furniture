@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Custom furniture store colors
+				sage: 'hsl(var(--sage))',
+				'sage-light': 'hsl(var(--sage-light))',
+				cream: 'hsl(var(--cream))',
+				'warm-gray': 'hsl(var(--warm-gray))',
+				charcoal: 'hsl(var(--charcoal))',
+				terracotta: 'hsl(var(--terracotta))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
