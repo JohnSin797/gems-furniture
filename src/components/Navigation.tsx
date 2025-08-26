@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, Menu, Search, Camera } from "lucide-react";
+import { ShoppingBag, Menu, Search, Camera, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleCameraClick = () => {
     if (fileInputRef.current) {
@@ -17,9 +20,18 @@ const Navigation = () => {
     const file = event.target.files?.[0];
     if (file) {
       console.log("Image captured for search:", file);
-      // Here you would implement the image search functionality
-      // For now, we'll just log the file
+      toast({
+        title: "Image captured",
+        description: "Processing your image for search...",
+      });
     }
+  };
+
+  const handleNotificationClick = () => {
+    toast({
+      title: "Notifications",
+      description: "You have 3 new notifications",
+    });
   };
 
   return (
@@ -67,6 +79,22 @@ const Navigation = () => {
               Products
             </Link>
             
+            {/* Notifications */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative p-2"
+              onClick={handleNotificationClick}
+            >
+              <Bell className="h-5 w-5 text-muted-foreground hover:text-sage" />
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
+                3
+              </Badge>
+            </Button>
+
             {/* Cart */}
             <Link to="/cart" className="relative">
               <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
