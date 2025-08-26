@@ -36,24 +36,28 @@ const Navigation = () => {
 
           {/* Navigation Items */}
           <div className="flex items-center space-x-6">
-            <a href="#" className="text-foreground hover:text-sage transition-colors hidden md:block">
+            <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">
               Products
-            </a>
+            </Link>
             
             {/* Cart */}
-            <div className="relative">
+            <Link to="/cart" className="relative">
               <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
               <span className="absolute -top-2 -right-2 bg-sage text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
-            </div>
+            </Link>
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-              <Button size="sm">
-                Sign Up
-              </Button>
+              <Link to="/signin">
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/signup">
+                <Button size="sm">
+                  Sign Up
+                </Button>
+              </Link>
             </div>
 
             {/* Mobile Menu */}
