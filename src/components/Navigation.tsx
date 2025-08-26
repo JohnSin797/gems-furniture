@@ -2,8 +2,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShoppingBag, Menu, Search, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 
 const Navigation = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCameraClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleImageCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log("Image captured for search:", file);
+      // Here you would implement the image search functionality
+      // For now, we'll just log the file
+    }
+  };
+
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,9 +46,18 @@ const Navigation = () => {
                 variant="ghost"
                 size="sm"
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                onClick={handleCameraClick}
               >
                 <Camera className="h-4 w-4" />
               </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleImageCapture}
+              />
             </div>
           </div>
 

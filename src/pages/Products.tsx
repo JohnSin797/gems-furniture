@@ -12,42 +12,48 @@ const products = [
     price: 899,
     originalPrice: 1199,
     image: "/src/assets/table-walnut.jpg",
-    category: "Dining"
+    category: "Dining",
+    type: "Table"
   },
   {
     id: "2",
     name: "Velvet Sage Sofa",
     price: 1299,
     image: "/src/assets/sofa-sage.jpg",
-    category: "Living Room"
+    category: "Living Room",
+    type: "Sofa"
   },
   {
     id: "3",
     name: "Cream Armchair",
     price: 599,
     image: "/src/assets/armchair-cream.jpg",
-    category: "Living Room"
+    category: "Living Room",
+    type: "Chair"
   },
   {
     id: "4",
     name: "Oak Bookshelf",
     price: 449,
     image: "/src/assets/bookshelf-oak.jpg",
-    category: "Office"
+    category: "Office",
+    type: "Storage"
   },
   {
     id: "5",
     name: "Wooden Nightstand",
     price: 299,
     image: "/src/assets/nightstand-wood.jpg",
-    category: "Bedroom"
+    category: "Bedroom",
+    type: "Storage"
   },
   {
     id: "6",
     name: "Oak Accent Chair",
     price: 399,
     image: "/src/assets/chair-oak.jpg",
-    category: "Living Room"
+    category: "Living Room",
+    type: "Chair"
   }
 ];
 
@@ -79,6 +85,19 @@ const Products = () => {
               <SelectItem value="bedroom">Bedroom</SelectItem>
               <SelectItem value="dining">Dining</SelectItem>
               <SelectItem value="office">Office</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="chair">Chair</SelectItem>
+              <SelectItem value="table">Table</SelectItem>
+              <SelectItem value="sofa">Sofa</SelectItem>
+              <SelectItem value="storage">Storage</SelectItem>
             </SelectContent>
           </Select>
           
