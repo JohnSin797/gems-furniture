@@ -83,23 +83,34 @@ const Navigation = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="relative p-2"
+              className="relative p-2 h-10 w-10"
               onClick={handleNotificationClick}
             >
-              <Bell className="h-5 w-5 text-muted-foreground hover:text-sage" />
+              <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground" />
               <Badge 
                 variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium"
               >
                 3
               </Badge>
             </Button>
 
             {/* Cart */}
-            <Link to="/cart" className="relative">
-              <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-sage cursor-pointer" />
-              <span className="absolute -top-2 -right-2 bg-sage text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
-            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative p-2 h-10 w-10"
+              asChild
+            >
+              <Link to="/cart">
+                <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                <Badge 
+                  className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium bg-primary text-primary-foreground"
+                >
+                  2
+                </Badge>
+              </Link>
+            </Button>
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
