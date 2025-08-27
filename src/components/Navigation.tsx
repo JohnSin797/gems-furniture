@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, Menu, Search, Camera, Bell } from "lucide-react";
+import { ShoppingBag, Menu, Search, Camera, Bell, User, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { user, userRole, signOut } = useAuth();
 
   const handleCameraClick = () => {
     if (fileInputRef.current) {
@@ -78,6 +80,11 @@ const Navigation = () => {
             <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">
               Products
             </Link>
+            {userRole === 'admin' && (
+              <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">
+                Admin
+              </Link>
+            )}
             
             {/* Notifications */}
             <Button
@@ -114,16 +121,21 @@ const Navigation = () => {
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
-              <Link to="/signin">
-                <Button variant="ghost" size="sm">
-                  Sign In
+              {user ? (
+                <Button variant="ghost" size="sm" onClick={signOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
                 </Button>
-              </Link>
-              <Link to="/signup">
-                <Button size="sm">
-                  Sign Up
-                </Button>
-              </Link>
+              ) : (
+                <>
+                  <Link to="/auth">
+                    <Button variant="ghost" size="sm">
+                      <User className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu */}
