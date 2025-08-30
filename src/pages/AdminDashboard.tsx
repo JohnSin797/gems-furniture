@@ -3,14 +3,25 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Package, ShoppingCart, Users, TrendingUp, Plus, Edit, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { ProductDialog } from "@/components/ProductDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
-  const stats = [
-    { title: "Total Products", value: "124", icon: Package, change: "+12%" },
-    { title: "Orders Today", value: "23", icon: ShoppingCart, change: "+8%" },
-    { title: "Active Users", value: "1,832", icon: Users, change: "+15%" },
-    { title: "Revenue", value: "$12,450", icon: TrendingUp, change: "+23%" },
-  ];
+  const { user, userRole } = useAuth();
+  const { toast } = useToast();
+  const [products, setProducts] = useState<any[]>([]);
+  const [stats, setStats] = useState([
+    { title: "Total Products", value: "0", icon: Package, change: "+0%" },
+    { title: "Orders Today", value: "0", icon: ShoppingCart, change: "+0%" },
+    { title: "Active Users", value: "0", icon: Users, change: "+0%" },
+    { title: "Revenue", value: "$0", icon: TrendingUp, change: "+0%" },
+  ]);
+  const [loading, setLoading] = useState(true);
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
   const recentOrders = [
     { id: "#1234", customer: "John Doe", product: "Oak Dining Table", amount: "$899", status: "pending" },
@@ -19,12 +30,113 @@ const AdminDashboard = () => {
     { id: "#1237", customer: "Sarah Wilson", product: "Walnut Nightstand", amount: "$329", status: "pending" },
   ];
 
-  const products = [
-    { id: 1, name: "Oak Dining Table", category: "Dining", price: "$899", stock: 12 },
-    { id: 2, name: "Sage Green Sofa", category: "Living Room", price: "$1,299", stock: 8 },
-    { id: 3, name: "Cream Armchair", category: "Living Room", price: "$649", stock: 15 },
-    { id: 4, name: "Walnut Nightstand", category: "Bedroom", price: "$329", stock: 23 },
-  ];
+  // Check if user is admin
+  useEffect(() => {
+    if (userRole && userRole !== 'admin') {
+      toast({
+        title: "Access Denied",
+        description: "You need admin privileges to access this page",
+        variant: "destructive",
+      });
+      window.location.href = '/';
+    }
+  }, [userRole, toast]);
+
+  // Fetch products and stats
+  useEffect(() => {
+    if (userRole === 'admin') {
+      fetchProducts();
+      fetchStats();
+    }
+  }, [userRole]);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          *,
+          inventory (
+            quantity,
+            reserved_quantity
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch products",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const { data: productsCount } = await supabase
+        .from('products')
+        .select('id', { count: 'exact' });
+
+      setStats(prev => prev.map(stat => 
+        stat.title === "Total Products" 
+          ? { ...stat, value: productsCount?.length?.toString() || "0" }
+          : stat
+      ));
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Product deleted successfully",
+      });
+      
+      fetchProducts();
+      fetchStats();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setProductDialogOpen(true);
+  };
+
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    setProductDialogOpen(true);
+  };
+
+  const handleProductSaved = () => {
+    fetchProducts();
+    fetchStats();
+    setProductDialogOpen(false);
+    setEditingProduct(null);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -104,7 +216,7 @@ const AdminDashboard = () => {
                 <CardTitle className="text-charcoal">Products</CardTitle>
                 <CardDescription>Manage your inventory</CardDescription>
               </div>
-              <Button className="bg-sage hover:bg-sage/90">
+              <Button className="bg-sage hover:bg-sage/90" onClick={handleAddProduct}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
               </Button>
@@ -120,33 +232,59 @@ const AdminDashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{product.name}</div>
-                          <div className="text-sm text-muted-foreground">{product.category}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{product.price}</TableCell>
-                      <TableCell>{product.stock}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center">Loading products...</TableCell>
                     </TableRow>
-                  ))}
+                  ) : products.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center">No products found</TableCell>
+                    </TableRow>
+                  ) : (
+                    products.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-sm text-muted-foreground">{product.category}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>${product.price}</TableCell>
+                        <TableCell>{product.inventory?.[0]?.quantity || 0}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditProduct(product)}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteProduct(product.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
         </div>
+
+        {/* Product Dialog */}
+        <ProductDialog
+          open={productDialogOpen}
+          onOpenChange={setProductDialogOpen}
+          product={editingProduct}
+          onSave={handleProductSaved}
+        />
       </div>
     </div>
   );
