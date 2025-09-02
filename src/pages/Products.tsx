@@ -3,61 +3,105 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-// Sample products data
-const products = [
-  {
-    id: "1",
-    name: "Modern Oak Dining Table",
-    price: 899,
-    originalPrice: 1199,
-    image: "/src/assets/table-walnut.jpg",
-    category: "Dining",
-    type: "Table"
-  },
-  {
-    id: "2",
-    name: "Velvet Sage Sofa",
-    price: 1299,
-    image: "/src/assets/sofa-sage.jpg",
-    category: "Living Room",
-    type: "Sofa"
-  },
-  {
-    id: "3",
-    name: "Cream Armchair",
-    price: 599,
-    image: "/src/assets/armchair-cream.jpg",
-    category: "Living Room",
-    type: "Chair"
-  },
-  {
-    id: "4",
-    name: "Oak Bookshelf",
-    price: 449,
-    image: "/src/assets/bookshelf-oak.jpg",
-    category: "Office",
-    type: "Storage"
-  },
-  {
-    id: "5",
-    name: "Wooden Nightstand",
-    price: 299,
-    image: "/src/assets/nightstand-wood.jpg",
-    category: "Bedroom",
-    type: "Storage"
-  },
-  {
-    id: "6",
-    name: "Oak Accent Chair",
-    price: 399,
-    image: "/src/assets/chair-oak.jpg",
-    category: "Living Room",
-    type: "Chair"
-  }
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string | null;
+  category: string;
+  type: string | null;
+  created_at: string;
+}
 
 const Products = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("featured");
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    filterAndSortProducts();
+  }, [products, categoryFilter, typeFilter, sortBy]);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('status', 'active');
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load products. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterAndSortProducts = () => {
+    let filtered = [...products];
+
+    // Apply category filter
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter(product => 
+        product.category.toLowerCase().replace(' ', '-') === categoryFilter
+      );
+    }
+
+    // Apply type filter
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(product => 
+        product.type?.toLowerCase() === typeFilter
+      );
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "price-low":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "newest":
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      default:
+        // Featured - keep original order
+        break;
+    }
+
+    setFilteredProducts(filtered);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">Loading products...</div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -75,7 +119,7 @@ const Products = () => {
             <Filter className="h-4 w-4" />
             <span className="text-sm font-medium">Filter by:</span>
           </div>
-          <Select>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -88,7 +132,7 @@ const Products = () => {
             </SelectContent>
           </Select>
           
-          <Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
@@ -101,7 +145,7 @@ const Products = () => {
             </SelectContent>
           </Select>
           
-          <Select>
+          <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
@@ -116,17 +160,23 @@ const Products = () => {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {products.map((product) => (
-            <ProductCard key={product.id} {...product} />
+          {filteredProducts.map((product) => (
+            <ProductCard 
+              key={product.id} 
+              id={product.id}
+              name={product.name}
+              price={product.price}
+              image={product.image_url || '/placeholder.svg'}
+              category={product.category}
+            />
           ))}
         </div>
 
-        {/* Load More */}
-        <div className="text-center">
-          <Button variant="outline" size="lg">
-            Load More Products
-          </Button>
-        </div>
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No products found matching your criteria.</p>
+          </div>
+        )}
       </main>
     </div>
   );

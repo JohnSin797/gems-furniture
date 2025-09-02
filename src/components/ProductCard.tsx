@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
 
 interface ProductCardProps {
   id: string;
@@ -12,8 +13,13 @@ interface ProductCardProps {
   category: string;
 }
 
-const ProductCard = ({ name, price, originalPrice, image, category }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, originalPrice, image, category }: ProductCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
+  const { addItem } = useCart();
+
+  const handleQuickAdd = () => {
+    addItem({ id, name, price, image });
+  };
 
   return (
     <Card className="group relative overflow-hidden border-0 shadow-none hover:shadow-product transition-all duration-300 bg-card">
@@ -40,7 +46,10 @@ const ProductCard = ({ name, price, originalPrice, image, category }: ProductCar
 
         {/* Quick add button */}
         <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-          <Button className="w-full bg-white text-charcoal hover:bg-white/90 font-semibold">
+          <Button 
+            onClick={handleQuickAdd}
+            className="w-full bg-white text-charcoal hover:bg-white/90 font-semibold"
+          >
             Quick Add
           </Button>
         </div>

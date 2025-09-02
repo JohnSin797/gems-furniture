@@ -6,11 +6,13 @@ import { useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/contexts/CartContext";
 
 const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
+  const { getItemCount } = useCart();
 
   const handleCameraClick = () => {
     if (fileInputRef.current) {
@@ -111,11 +113,13 @@ const Navigation = () => {
             >
               <Link to="/cart">
                 <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-                <Badge 
-                  className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium bg-primary text-primary-foreground"
-                >
-                  2
-                </Badge>
+                {getItemCount() > 0 && (
+                  <Badge 
+                    className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium bg-primary text-primary-foreground"
+                  >
+                    {getItemCount()}
+                  </Badge>
+                )}
               </Link>
             </Button>
 
