@@ -45,7 +45,7 @@ const Navigation = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="text-2xl font-bold text-charcoal hover:text-sage transition-colors">
-              Luxe Home
+              Gemms Furniture
             </Link>
           </div>
 
