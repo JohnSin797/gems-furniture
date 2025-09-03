@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
+import Orders from "./pages/Orders";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +47,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAuth>
                     <Cart />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/orders" 
+                element={
+                  <ProtectedRoute requireAuth>
+                    <Orders />
                   </ProtectedRoute>
                 } 
               />

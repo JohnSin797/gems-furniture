@@ -82,6 +82,11 @@ const Navigation = () => {
             <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">
               Products
             </Link>
+            {user && (
+              <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">
+                Orders
+              </Link>
+            )}
             {userRole === 'admin' && (
               <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">
                 Admin
