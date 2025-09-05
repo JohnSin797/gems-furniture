@@ -18,7 +18,7 @@ export const ImageUploadSelector = ({ value, onChange }: ImageUploadSelectorProp
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [selectedTab, setSelectedTab] = useState("url");
+  const [selectedTab, setSelectedTab] = useState("upload");
 
   useEffect(() => {
     fetchExistingImages();
@@ -113,20 +113,10 @@ export const ImageUploadSelector = ({ value, onChange }: ImageUploadSelectorProp
       <Label>Product Image</Label>
       
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="url">URL</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="upload">Upload</TabsTrigger>
           <TabsTrigger value="existing">Select Existing</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="url" className="space-y-2">
-          <Input
-            type="url"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="https://example.com/image.jpg"
-          />
-        </TabsContent>
         
         <TabsContent value="upload" className="space-y-2">
           <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-6">
