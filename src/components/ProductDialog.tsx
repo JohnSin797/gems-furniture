@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUploadSelector } from "./ImageUploadSelector";
 
 interface ProductDialogProps {
   open: boolean;
@@ -232,16 +233,10 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="image_url">Image URL</Label>
-            <Input
-              id="image_url"
-              type="url"
-              value={formData.image_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
+          <ImageUploadSelector
+            value={formData.image_url}
+            onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
