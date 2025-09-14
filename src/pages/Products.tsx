@@ -6,6 +6,8 @@ import { Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 interface Product {
   id: string;
@@ -25,14 +27,34 @@ const Products = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const { toast } = useToast();
+  const location = useLocation();
+  const [imageSearchActive, setImageSearchActive] = useState(false);
+  const [searchTerms, setSearchTerms] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
+  // Handle image search results from navigation
   useEffect(() => {
-    filterAndSortProducts();
-  }, [products, categoryFilter, typeFilter, sortBy]);
+    const state = location.state as any;
+    if (state?.imageSearchResults) {
+      const { imageSearchResults, searchTerms: terms } = state;
+      setFilteredProducts(imageSearchResults);
+      setImageSearchActive(true);
+      setSearchTerms(terms || []);
+      toast({
+        title: "Image search results",
+        description: `Showing ${imageSearchResults.length} products matching your image`,
+      });
+    }
+  }, [location.state, toast]);
+
+  useEffect(() => {
+    if (!imageSearchActive) {
+      filterAndSortProducts();
+    }
+  }, [products, categoryFilter, typeFilter, sortBy, imageSearchActive]);
 
   const fetchProducts = async () => {
     try {
@@ -109,8 +131,38 @@ const Products = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Products</h1>
-          <p className="text-muted-foreground">Discover our curated collection of premium furniture</p>
+          <h1 className="text-4xl font-bold text-foreground mb-4">
+            {imageSearchActive ? 'Image Search Results' : 'Products'}
+          </h1>
+          <p className="text-muted-foreground mb-4">
+            {imageSearchActive 
+              ? 'Products matching your uploaded image' 
+              : 'Discover our curated collection of premium furniture'
+            }
+          </p>
+          
+          {imageSearchActive && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium">Detected terms:</span>
+                {searchTerms.map((term, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {term}
+                  </Badge>
+                ))}
+              </div>
+              <button
+                onClick={() => {
+                  setImageSearchActive(false);
+                  setSearchTerms([]);
+                  filterAndSortProducts();
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                ← Back to all products
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Filters */}

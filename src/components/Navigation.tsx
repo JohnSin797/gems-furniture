@@ -1,17 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShoppingBag, Menu, Search, Camera, Bell, User, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
   
 
   const handleCameraClick = () => {
@@ -20,14 +23,64 @@ const Navigation = () => {
     }
   };
 
-  const handleImageCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      console.log("Image captured for search:", file);
+      setIsProcessingImage(true);
+      
       toast({
-        title: "Image captured",
-        description: "Processing your image for search...",
+        title: "Processing image",
+        description: "Analyzing your image to find similar products...",
       });
+
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const { data, error } = await supabase.functions.invoke('image-search', {
+          body: formData,
+        });
+
+        if (error) throw error;
+
+        const { searchTerms, matchingProducts, analysis } = data;
+        
+        console.log('Image analysis results:', { searchTerms, matchingProducts, analysis });
+
+        if (matchingProducts && matchingProducts.length > 0) {
+          toast({
+            title: "Found matching products!",
+            description: `Found ${matchingProducts.length} similar items`,
+          });
+          
+          // Navigate to products page with search results
+          navigate('/products', { 
+            state: { 
+              imageSearchResults: matchingProducts,
+              searchTerms: searchTerms
+            }
+          });
+        } else {
+          toast({
+            title: "No matches found",
+            description: "Try capturing a clearer image of furniture items",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error('Image search error:', error);
+        toast({
+          title: "Search failed",
+          description: "Failed to analyze image. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsProcessingImage(false);
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
     }
   };
 
@@ -63,8 +116,9 @@ const Navigation = () => {
                 size="sm"
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
                 onClick={handleCameraClick}
+                disabled={isProcessingImage}
               >
-                <Camera className="h-4 w-4" />
+                <Camera className={`h-4 w-4 ${isProcessingImage ? 'animate-pulse' : ''}`} />
               </Button>
               <input
                 ref={fileInputRef}
