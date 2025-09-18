@@ -35,13 +35,29 @@ serve(async (req) => {
     }
 
     console.log('Service account loaded, parsing JSON...');
+    console.log('Raw service account (first 100 chars):', serviceAccountJson.substring(0, 100));
     
     let credentials;
     try {
-      credentials = JSON.parse(serviceAccountJson);
+      // Handle different possible formats of the secret
+      let cleanJson = serviceAccountJson.trim();
+      
+      // Remove outer quotes if present
+      if (cleanJson.startsWith('"') && cleanJson.endsWith('"')) {
+        cleanJson = cleanJson.slice(1, -1);
+      }
+      
+      // Unescape any escaped quotes
+      cleanJson = cleanJson.replace(/\\"/g, '"');
+      
+      console.log('Cleaned JSON (first 100 chars):', cleanJson.substring(0, 100));
+      
+      credentials = JSON.parse(cleanJson);
+      console.log('Successfully parsed service account JSON');
     } catch (parseError) {
       console.error('Failed to parse service account JSON:', parseError);
-      throw new Error('Invalid service account JSON format');
+      console.error('Service account value:', serviceAccountJson);
+      throw new Error(`Invalid service account JSON format: ${parseError.message}`);
     }
     
     // Create JWT token for Google Cloud Vision API
