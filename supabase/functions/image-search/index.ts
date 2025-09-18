@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Image search function starting');
+    
     const formData = await req.formData();
     const imageFile = formData.get('image') as File;
     
@@ -20,17 +22,27 @@ serve(async (req) => {
       throw new Error('No image file provided');
     }
 
+    console.log('Image file received:', imageFile.name, imageFile.size);
+
     // Convert image to base64
     const imageBytes = await imageFile.arrayBuffer();
     const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBytes)));
 
     // Get Google Cloud service account from Supabase secrets
-    const serviceAccount = Deno.env.get('GCLOUD_SERVICE_ACCOUNT');
-    if (!serviceAccount) {
+    const serviceAccountJson = Deno.env.get('GCLOUD_SERVICE_ACCOUNT');
+    if (!serviceAccountJson) {
       throw new Error('Google Cloud service account not configured');
     }
 
-    const credentials = JSON.parse(serviceAccount);
+    console.log('Service account loaded, parsing JSON...');
+    
+    let credentials;
+    try {
+      credentials = JSON.parse(serviceAccountJson);
+    } catch (parseError) {
+      console.error('Failed to parse service account JSON:', parseError);
+      throw new Error('Invalid service account JSON format');
+    }
     
     // Create JWT token for Google Cloud Vision API
     const header = {
@@ -168,7 +180,7 @@ serve(async (req) => {
       const { data: products, error } = await supabase
         .from('products')
         .select('*')
-        .eq('is_active', true)
+        .eq('status', 'active')
         .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,category.ilike.%${searchTerms[0]}%,type.ilike.%${searchTerms[0]}%`)
         .limit(10);
 
