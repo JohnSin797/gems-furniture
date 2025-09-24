@@ -5,6 +5,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import PurchaseModal from "./PurchaseModal";
 
 interface ProductCardProps {
   id: string;
@@ -17,68 +18,15 @@ interface ProductCardProps {
 
 const ProductCard = ({ id, name, price, originalPrice, image, category }: ProductCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
-  const [buying, setBuying] = useState(false);
-  const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = () => {
     if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to make a purchase.",
-        variant: "destructive"
-      });
+      // This should be handled in the modal, but keeping for consistency
       return;
     }
-
-    setBuying(true);
-    try {
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
-          status: 'pending',
-          subtotal: price,
-          tax_amount: price * 0.1, // 10% tax
-          shipping_amount: 10, // $10 shipping
-          total_amount: price + (price * 0.1) + 10,
-          order_number: `ORD-${Date.now()}`
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order item
-      const { error: itemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          product_id: id,
-          product_name: name,
-          product_image: image,
-          quantity: 1,
-          unit_price: price,
-          total_price: price
-        });
-
-      if (itemError) throw itemError;
-
-      toast({
-        title: "Order placed successfully!",
-        description: `Order ${order.order_number} has been created.`
-      });
-    } catch (error) {
-      console.error('Error creating order:', error);
-      toast({
-        title: "Error",
-        description: "Failed to place order. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setBuying(false);
-    }
+    setIsModalOpen(true);
   };
 
   return (
@@ -106,12 +54,11 @@ const ProductCard = ({ id, name, price, originalPrice, image, category }: Produc
 
         {/* Buy now button */}
         <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-          <Button 
+          <Button
             onClick={handleBuyNow}
-            disabled={buying}
             className="w-full bg-white text-charcoal hover:bg-white/90 font-semibold"
           >
-            {buying ? "Processing..." : "Buy Now"}
+            Buy Now
           </Button>
         </div>
       </div>
@@ -129,6 +76,12 @@ const ProductCard = ({ id, name, price, originalPrice, image, category }: Produc
           )}
         </div>
       </div>
+
+      <PurchaseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={{ id, name, price, image }}
+      />
     </Card>
   );
 };

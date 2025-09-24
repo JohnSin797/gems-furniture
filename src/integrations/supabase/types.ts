@@ -144,7 +144,6 @@ export type Database = {
           shipping_amount: number
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
-          tax_amount: number
           total_amount: number
           updated_at: string
           user_id: string
@@ -161,7 +160,6 @@ export type Database = {
           shipping_amount?: number
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
-          tax_amount?: number
           total_amount?: number
           updated_at?: string
           user_id: string
@@ -178,7 +176,6 @@ export type Database = {
           shipping_amount?: number
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
-          tax_amount?: number
           total_amount?: number
           updated_at?: string
           user_id?: string

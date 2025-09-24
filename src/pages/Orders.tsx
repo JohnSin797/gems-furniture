@@ -1,9 +1,8 @@
 import Navigation from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Package, Clock, Truck, CheckCircle, XCircle, Eye } from "lucide-react";
+import { Package, Eye } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,7 +24,6 @@ interface Order {
   status: string;
   total_amount: number;
   subtotal: number;
-  tax_amount: number;
   shipping_amount: number;
   created_at: string;
   order_items: OrderItem[];
@@ -69,41 +67,7 @@ const Orders = () => {
     }
   }, [user, userRole, toast]);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="h-4 w-4" />;
-      case 'confirmed':
-      case 'processing':
-        return <Package className="h-4 w-4" />;
-      case 'shipped':
-        return <Truck className="h-4 w-4" />;
-      case 'delivered':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'cancelled':
-        return <XCircle className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
-  };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'confirmed':
-      case 'processing':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'delivered':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
 
   const toggleOrderDetails = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -175,15 +139,8 @@ const Orders = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <Badge 
-                        className={`flex items-center space-x-1 ${getStatusColor(order.status)}`}
-                        variant="outline"
-                      >
-                        {getStatusIcon(order.status)}
-                        <span className="capitalize">{order.status}</span>
-                      </Badge>
-                      <Button
+                     <div className="flex items-center space-x-4">
+                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleOrderDetails(order.id)}
@@ -201,18 +158,14 @@ const Orders = () => {
                       <p className="text-sm text-muted-foreground">Items</p>
                       <p className="font-semibold">{order.order_items?.length || 0}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Subtotal</p>
-                      <p className="font-semibold">${order.subtotal.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Tax</p>
-                      <p className="font-semibold">${order.tax_amount.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total</p>
-                      <p className="font-semibold text-lg">${order.total_amount.toFixed(2)}</p>
-                    </div>
+                     <div>
+                       <p className="text-sm text-muted-foreground">Subtotal</p>
+                       <p className="font-semibold">${order.subtotal.toFixed(2)}</p>
+                     </div>
+                     <div>
+                       <p className="text-sm text-muted-foreground">Total</p>
+                       <p className="font-semibold text-lg">${order.total_amount.toFixed(2)}</p>
+                     </div>
                   </div>
 
                   {/* Order Details */}
