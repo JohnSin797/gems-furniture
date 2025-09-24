@@ -227,36 +227,51 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
-        Row: {
-          created_at: string
-          email: string | null
-          first_name: string | null
-          id: string
-          last_name: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+       profiles: {
+         Row: {
+           barangay: string | null
+           city: string | null
+           created_at: string
+           email: string | null
+           first_name: string | null
+           id: string
+           last_name: string | null
+           province: string | null
+           street_address: string | null
+           updated_at: string
+           user_id: string
+           zip_code: string | null
+         }
+         Insert: {
+           barangay?: string | null
+           city?: string | null
+           created_at?: string
+           email?: string | null
+           first_name?: string | null
+           id?: string
+           last_name?: string | null
+           province?: string | null
+           street_address?: string | null
+           updated_at?: string
+           user_id: string
+           zip_code?: string | null
+         }
+         Update: {
+           barangay?: string | null
+           city?: string | null
+           created_at?: string
+           email?: string | null
+           first_name?: string | null
+           id?: string
+           last_name?: string | null
+           province?: string | null
+           street_address?: string | null
+           updated_at?: string
+           user_id?: string
+           zip_code?: string | null
+         }
+         Relationships: []
+       }
       purchase_order_items: {
         Row: {
           created_at: string

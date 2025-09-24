@@ -9,8 +9,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
 import Products from "./pages/Products";
-
 import Orders from "./pages/Orders";
+import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -41,13 +41,21 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/orders" 
+            <Route
+              path="/orders"
               element={
                 <ProtectedRoute requireAuth>
                   <Orders />
                 </ProtectedRoute>
-              } 
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute requireAuth>
+                  <Profile />
+                </ProtectedRoute>
+              }
             />
             <Route path="/auth" element={<Auth />} />
             {/* Legacy routes for backward compatibility */}
