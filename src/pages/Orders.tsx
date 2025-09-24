@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Package, Clock, Truck, CheckCircle, XCircle, Eye } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -35,25 +35,25 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      fetchOrders();
-    }
-  }, [user]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
-      const { data: ordersData, error: ordersError } = await supabase
+      let query = supabase
         .from('orders')
         .select(`
           *,
           order_items (*)
         `)
-        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
+
+      // Only filter by user_id if not admin
+      if (userRole !== 'admin') {
+        query = query.eq('user_id', user?.id);
+      }
+
+      const { data: ordersData, error: ordersError } = await query;
 
       if (ordersError) throw ordersError;
       setOrders(ordersData || []);
@@ -67,7 +67,7 @@ const Orders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, userRole, toast]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -109,6 +109,12 @@ const Orders = () => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
   };
 
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    }
+  }, [user, userRole, fetchOrders]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -126,18 +132,31 @@ const Orders = () => {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">My Orders</h1>
-          <p className="text-muted-foreground">Track and manage your order history</p>
+          <h1 className="text-4xl font-bold text-foreground mb-4">
+            {userRole === 'admin' ? 'All Orders' : 'My Orders'}
+          </h1>
+          <p className="text-muted-foreground">
+            {userRole === 'admin' ? 'View and manage all customer orders' : 'Track and manage your order history'}
+          </p>
         </div>
 
         {orders.length === 0 ? (
           <div className="text-center py-12">
             <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">No orders yet</h3>
-            <p className="text-muted-foreground mb-6">Start shopping to see your orders here.</p>
-            <Button asChild>
-              <a href="/products">Browse Products</a>
-            </Button>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              {userRole === 'admin' ? 'No orders found' : 'No orders yet'}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {userRole === 'admin'
+                ? 'There are no orders in the system yet.'
+                : 'Start shopping to see your orders here.'
+              }
+            </p>
+            {userRole !== 'admin' && (
+              <Button asChild>
+                <a href="/products">Browse Products</a>
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-6">
