@@ -3,7 +3,7 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
@@ -17,6 +17,7 @@ interface Product {
   category: string;
   type: string | null;
   created_at: string;
+  description?: string;
 }
 
 const Products = () => {
@@ -30,33 +31,10 @@ const Products = () => {
   const location = useLocation();
   const [imageSearchActive, setImageSearchActive] = useState(false);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
+  const [textSearchActive, setTextSearchActive] = useState(false);
+  const [textSearchQuery, setTextSearchQuery] = useState("");
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  // Handle image search results from navigation
-  useEffect(() => {
-    const state = location.state as any;
-    if (state?.imageSearchResults) {
-      const { imageSearchResults, searchTerms: terms } = state;
-      setFilteredProducts(imageSearchResults);
-      setImageSearchActive(true);
-      setSearchTerms(terms || []);
-      toast({
-        title: "Image search results",
-        description: `Showing ${imageSearchResults.length} products matching your image`,
-      });
-    }
-  }, [location.state, toast]);
-
-  useEffect(() => {
-    if (!imageSearchActive) {
-      filterAndSortProducts();
-    }
-  }, [products, categoryFilter, typeFilter, sortBy, imageSearchActive]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('products')
@@ -75,21 +53,63 @@ const Products = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const filterAndSortProducts = () => {
+  // Fetch products on component mount
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Handle search results from navigation
+  useEffect(() => {
+    const state = location.state as { imageSearchResults?: Product[]; searchTerms?: string[]; searchQuery?: string } | null;
+    if (state?.imageSearchResults) {
+      const { imageSearchResults, searchTerms: terms } = state;
+      setFilteredProducts(imageSearchResults);
+      setImageSearchActive(true);
+      setTextSearchActive(false);
+      setSearchTerms(terms || []);
+      setTextSearchQuery("");
+      toast({
+        title: "Image search results",
+        description: `Showing ${imageSearchResults.length} products matching your image`,
+      });
+    } else if (state?.searchQuery) {
+      setTextSearchQuery(state.searchQuery);
+      setTextSearchActive(true);
+      setImageSearchActive(false);
+      setSearchTerms([]);
+      toast({
+        title: "Search results",
+        description: `Showing products matching "${state.searchQuery}"`,
+      });
+    }
+  }, [location.state, toast]);
+
+  const filterAndSortProducts = useCallback(() => {
     let filtered = [...products];
+
+    // Apply text search filter
+    if (textSearchActive && textSearchQuery) {
+      const query = textSearchQuery.toLowerCase();
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(query) ||
+        product.description?.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query) ||
+        product.type?.toLowerCase().includes(query)
+      );
+    }
 
     // Apply category filter
     if (categoryFilter !== "all") {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.category.toLowerCase().replace(' ', '-') === categoryFilter
       );
     }
 
     // Apply type filter
     if (typeFilter !== "all") {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.type?.toLowerCase() === typeFilter
       );
     }
@@ -111,7 +131,14 @@ const Products = () => {
     }
 
     setFilteredProducts(filtered);
-  };
+  }, [products, textSearchActive, textSearchQuery, categoryFilter, typeFilter, sortBy]);
+
+  // Handle filtering and sorting
+  useEffect(() => {
+    if (!imageSearchActive && !textSearchActive && products.length > 0) {
+      filterAndSortProducts();
+    }
+  }, [products, textSearchActive, textSearchQuery, categoryFilter, typeFilter, sortBy, imageSearchActive, filterAndSortProducts]);
 
   if (loading) {
     return (
@@ -132,12 +159,14 @@ const Products = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            {imageSearchActive ? 'Image Search Results' : 'Products'}
+            {imageSearchActive ? 'Image Search Results' : textSearchActive ? 'Search Results' : 'Products'}
           </h1>
           <p className="text-muted-foreground mb-4">
-            {imageSearchActive 
-              ? 'Products matching your uploaded image' 
-              : 'Discover our curated collection of premium furniture'
+            {imageSearchActive
+              ? 'Products matching your uploaded image'
+              : textSearchActive
+                ? `Products matching "${textSearchQuery}"`
+                : 'Discover our curated collection of premium furniture'
             }
           </p>
           
@@ -155,6 +184,21 @@ const Products = () => {
                 onClick={() => {
                   setImageSearchActive(false);
                   setSearchTerms([]);
+                  filterAndSortProducts();
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                ← Back to all products
+              </button>
+            </div>
+          )}
+
+          {textSearchActive && (
+            <div className="mb-6">
+              <button
+                onClick={() => {
+                  setTextSearchActive(false);
+                  setTextSearchQuery("");
                   filterAndSortProducts();
                 }}
                 className="text-sm text-primary hover:underline"

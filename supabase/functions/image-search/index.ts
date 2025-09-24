@@ -31,7 +31,17 @@ serve(async (req) => {
     // Get Google Cloud service account from Supabase secrets
     const serviceAccountJson = Deno.env.get('GCLOUD_SERVICE_ACCOUNT');
     if (!serviceAccountJson) {
-      throw new Error('Google Cloud service account not configured');
+      console.log('Google Cloud service account not configured, using fallback search');
+      // Fallback: return empty results with a message
+      return new Response(JSON.stringify({
+        searchTerms: ['image search not available'],
+        dominantColors: [],
+        matchingProducts: [],
+        analysis: { labels: [], objects: [] },
+        error: 'Image search service not configured'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     console.log('Service account loaded, parsing JSON...');
@@ -190,21 +200,51 @@ serve(async (req) => {
     );
 
     let matchingProducts = [];
-    
+
     if (searchTerms.length > 0) {
-      const searchQuery = searchTerms.join(' | ');
-      const { data: products, error } = await supabase
+      try {
+        // Try to search using the first few search terms
+        const searchConditions = searchTerms.slice(0, 3).map(term =>
+          `name.ilike.%${term}%,description.ilike.%${term}%,category.ilike.%${term}%,type.ilike.%${term}%`
+        ).join(',');
+
+        const { data: products, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('status', 'active')
+          .or(searchConditions)
+          .limit(10);
+
+        if (error) {
+          console.error('Database search error:', error);
+          // Fallback: get some random active products
+          const { data: fallbackProducts } = await supabase
+            .from('products')
+            .select('*')
+            .eq('status', 'active')
+            .limit(5);
+          matchingProducts = fallbackProducts || [];
+        } else {
+          matchingProducts = products || [];
+        }
+      } catch (searchError) {
+        console.error('Search failed, using fallback:', searchError);
+        // Fallback: get some random active products
+        const { data: fallbackProducts } = await supabase
+          .from('products')
+          .select('*')
+          .eq('status', 'active')
+          .limit(5);
+        matchingProducts = fallbackProducts || [];
+      }
+    } else {
+      // No search terms found, return some featured products
+      const { data: fallbackProducts } = await supabase
         .from('products')
         .select('*')
         .eq('status', 'active')
-        .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,category.ilike.%${searchTerms[0]}%,type.ilike.%${searchTerms[0]}%`)
-        .limit(10);
-
-      if (error) {
-        console.error('Database search error:', error);
-      } else {
-        matchingProducts = products || [];
-      }
+        .limit(5);
+      matchingProducts = fallbackProducts || [];
     }
 
     return new Response(JSON.stringify({

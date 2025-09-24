@@ -8,14 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-
 const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
   const [isProcessingImage, setIsProcessingImage] = useState(false);
-  
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleCameraClick = () => {
     if (fileInputRef.current) {
@@ -27,7 +26,7 @@ const Navigation = () => {
     const file = event.target.files?.[0];
     if (file) {
       setIsProcessingImage(true);
-      
+
       toast({
         title: "Processing image",
         description: "Analyzing your image to find similar products...",
@@ -35,50 +34,47 @@ const Navigation = () => {
 
       try {
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append("image", file);
 
-        const { data, error } = await supabase.functions.invoke('image-search', {
+        const { data, error } = await supabase.functions.invoke("image-search", {
           body: formData,
         });
 
         if (error) throw error;
 
         const { searchTerms, matchingProducts, analysis } = data;
-        
-        console.log('Image analysis results:', { searchTerms, matchingProducts, analysis });
+        console.log("Image analysis results:", { searchTerms, matchingProducts, analysis });
 
         if (matchingProducts && matchingProducts.length > 0) {
           toast({
             title: "Found matching products!",
             description: `Found ${matchingProducts.length} similar items`,
           });
-          
-          // Navigate to products page with search results
-          navigate('/products', { 
-            state: { 
+
+          navigate("/products", {
+            state: {
               imageSearchResults: matchingProducts,
-              searchTerms: searchTerms
-            }
+              searchTerms,
+            },
           });
         } else {
           toast({
             title: "No matches found",
             description: "Try capturing a clearer image of furniture items",
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       } catch (error) {
-        console.error('Image search error:', error);
+        console.error("Image search error:", error);
         toast({
           title: "Search failed",
           description: "Failed to analyze image. Please try again.",
-          variant: "destructive"
+          variant: "destructive",
         });
       } finally {
         setIsProcessingImage(false);
-        // Reset the file input
         if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+          fileInputRef.current.value = "";
         }
       }
     }
@@ -91,14 +87,29 @@ const Navigation = () => {
     });
   };
 
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate("/products", {
+        state: { searchQuery: searchQuery.trim() },
+      });
+    }
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") handleSearch();
+  };
+
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="text-2xl font-bold text-charcoal hover:text-sage transition-colors">
-              Gemms Furniture
+            <Link
+              to="/"
+              className="text-2xl font-bold text-charcoal hover:text-sage transition-colors"
+            >
+              Gems Furniture
             </Link>
           </div>
 
@@ -110,7 +121,19 @@ const Navigation = () => {
                 type="text"
                 placeholder="Search products..."
                 className="w-full pl-10 pr-12"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
               />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-10 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                onClick={handleSearch}
+                disabled={!searchQuery.trim()}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -118,7 +141,7 @@ const Navigation = () => {
                 onClick={handleCameraClick}
                 disabled={isProcessingImage}
               >
-                <Camera className={`h-4 w-4 ${isProcessingImage ? 'animate-pulse' : ''}`} />
+                <Camera className={`h-4 w-4 ${isProcessingImage ? "animate-pulse" : ""}`} />
               </Button>
               <input
                 ref={fileInputRef}
@@ -133,20 +156,29 @@ const Navigation = () => {
 
           {/* Navigation Items */}
           <div className="flex items-center space-x-6">
-            <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">
+            <Link
+              to="/products"
+              className="text-foreground hover:text-sage transition-colors hidden md:block"
+            >
               Products
             </Link>
             {user && (
-              <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">
+              <Link
+                to="/orders"
+                className="text-foreground hover:text-sage transition-colors hidden md:block"
+              >
                 Orders
               </Link>
             )}
-            {userRole === 'admin' && (
-              <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">
+            {userRole === "admin" && (
+              <Link
+                to="/admin"
+                className="text-foreground hover:text-sage transition-colors hidden md:block"
+              >
                 Admin
               </Link>
             )}
-            
+
             {/* Notifications */}
             <Button
               variant="ghost"
@@ -155,14 +187,13 @@ const Navigation = () => {
               onClick={handleNotificationClick}
             >
               <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-              <Badge 
-                variant="destructive" 
+              <Badge
+                variant="destructive"
                 className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium"
               >
                 3
               </Badge>
             </Button>
-
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
@@ -172,14 +203,12 @@ const Navigation = () => {
                   Sign Out
                 </Button>
               ) : (
-                <>
-                  <Link to="/auth">
-                    <Button variant="ghost" size="sm">
-                      <User className="h-4 w-4 mr-2" />
-                      Sign In
-                    </Button>
-                  </Link>
-                </>
+                <Link to="/auth">
+                  <Button variant="ghost" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
               )}
             </div>
 

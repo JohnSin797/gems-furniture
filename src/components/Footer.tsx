@@ -5,7 +5,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1">
-            <h3 className="text-2xl font-bold mb-4">Gemms Furniture</h3>
+            <h3 className="text-2xl font-bold mb-4">Gems Furniture</h3>
             <p className="text-white/70 mb-6">
               Creating beautiful, functional spaces with timeless furniture pieces.
             </p>
@@ -65,7 +65,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-white/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-white/70 text-sm">© 2024 Gemms Furniture. All rights reserved.</p>
+            <p className="text-white/70 text-sm">© 2024 Gems Furniture. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-white/70 hover:text-white text-sm transition-colors">Privacy Policy</a>
             <a href="#" className="text-white/70 hover:text-white text-sm transition-colors">Terms of Service</a>
