@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { createNotification } = useNotifications();
 
   const subtotal = product.price * quantity;
   const shipping = 0; // No shipping
@@ -138,6 +140,14 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
         title: "Purchase confirmed!",
         description: `Order ${order.order_number} has been placed successfully.`,
       });
+
+      // Create purchase notification
+      await createNotification(
+        user.id,
+        "Purchase Confirmed",
+        `Your order ${order.order_number} for ${quantity} × ${product.name} has been placed successfully.`,
+        "success"
+      );
 
       onClose();
     } catch (error) {

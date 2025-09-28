@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useNotifications } from "@/hooks/useNotifications";
+import Notifications from "@/components/Notifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,8 @@ const Navigation = () => {
   const navigate = useNavigate();
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { unreadCount } = useNotifications();
 
   const handleCameraClick = () => {
     if (fileInputRef.current) {
@@ -87,10 +91,7 @@ const Navigation = () => {
   };
 
   const handleNotificationClick = () => {
-    toast({
-      title: "Notifications",
-      description: "You have 3 new notifications",
-    });
+    setNotificationsOpen(!notificationsOpen);
   };
 
   const handleSearch = () => {
@@ -193,12 +194,14 @@ const Navigation = () => {
               onClick={handleNotificationClick}
             >
               <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium"
-              >
-                3
-              </Badge>
+              {unreadCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium"
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </Badge>
+              )}
             </Button>
 
             {/* Auth Buttons */}
@@ -238,6 +241,12 @@ const Navigation = () => {
           </div>
         </div>
       </div>
+
+      {/* Notifications Panel */}
+      <Notifications
+        isOpen={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+      />
     </nav>
   );
 };

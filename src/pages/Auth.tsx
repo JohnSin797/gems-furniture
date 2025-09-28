@@ -10,12 +10,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useNotifications } from '@/hooks/useNotifications';
 import Navigation from '@/components/Navigation';
 
 const Auth = () => {
   const navigate = useNavigate();
   const { user, userRole, loading } = useAuth();
   const { toast } = useToast();
+  const { createNotification } = useNotifications();
   
   const [isLoading, setIsLoading] = useState(false);
   const [signInData, setSignInData] = useState({ email: '', password: '' });
@@ -75,6 +77,15 @@ const Auth = () => {
           title: "Success",
           description: "Signed in successfully!",
         });
+
+        // Create welcome notification
+        await createNotification(
+          data.user.id,
+          "Welcome back!",
+          "You've successfully signed in to your Gems Furniture account.",
+          "success"
+        );
+
         // Force page reload for clean state
         window.location.href = '/';
       }
