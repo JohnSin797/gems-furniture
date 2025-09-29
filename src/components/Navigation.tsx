@@ -27,100 +27,113 @@ const Navigation = () => {
   const { unreadCount } = useNotifications();
 
   const handleCameraClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    if (fileInputRef.current) fileInputRef.current.click();
   };
 
   const handleImageCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setIsProcessingImage(true);
+    if (!file) return;
+
+    setIsProcessingImage(true);
+    toast({ title: "Processing image", description: "Analyzing your image..." });
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      console.log("Sending image search request...");
+      const res = await fetch(
+        "https://zdktmnzetynreahdpjim.supabase.co/functions/v1/image-search",
+        { method: "POST", body: formData }
+      );
+
+      const data = await res.json();
+
+      const { searchTerms, matchingProducts } = data;
+
+      navigate("/products", {
+        state: {
+          imageSearchResults: matchingProducts || [],
+          searchTerms: searchTerms || [],
+        },
+      });
 
       toast({
-        title: "Processing image",
-        description: "Analyzing your image to find similar products...",
+        title: "Image search completed",
+        description: matchingProducts?.length
+          ? `Found ${matchingProducts.length} similar products`
+          : "No products found",
       });
-
-      try {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        const { data, error } = await supabase.functions.invoke("image-search", {
-          body: formData,
-        });
-
-        if (error) throw error;
-
-        const { searchTerms, matchingProducts, analysis } = data;
-        console.log("Image analysis results:", { searchTerms, matchingProducts, analysis });
-
-        if (matchingProducts && matchingProducts.length > 0) {
-          toast({
-            title: "Found matching products!",
-            description: `Found ${matchingProducts.length} similar items`,
-          });
-
-          navigate("/products", {
-            state: {
-              imageSearchResults: matchingProducts,
-              searchTerms,
-            },
-          });
-        } else {
-          toast({
-            title: "No matches found",
-            description: "Try capturing a clearer image of furniture items",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Image search error:", error);
-        toast({
-          title: "Search failed",
-          description: "Failed to analyze image. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsProcessingImage(false);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-      }
+    } catch (error) {
+      console.error("Image search error:", error);
+      toast({ title: "Search failed", description: "Failed to analyze image.", variant: "destructive" });
+    } finally {
+      setIsProcessingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const handleNotificationClick = () => {
-    setNotificationsOpen(!notificationsOpen);
-  };
+  const handleSearch = async () => {
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) return;
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) console.error("Error fetching session:", error);
+
+      const token = data?.session?.access_token;
+      console.log("Text search query:", trimmedQuery, "User token:", token);
+
+      const res = await fetch(
+        "https://zdktmnzetynreahdpjim.supabase.co/functions/v1/text-search",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ query: trimmedQuery }),
+        }
+      );
+
+      const dataResponse = await res.json();
+      console.log("Text search response:", dataResponse);
+
+      const { searchTerms, matchingProducts } = dataResponse;
+
       navigate("/products", {
-        state: { searchQuery: searchQuery.trim() },
+        state: {
+          searchQuery: trimmedQuery,
+          searchTerms: searchTerms || [],
+          matchingProducts: matchingProducts || [],
+        },
       });
+
+      toast({
+        title: "Search completed",
+        description: matchingProducts?.length
+          ? `Found ${matchingProducts.length} products`
+          : "No products found",
+      });
+    } catch (error) {
+      console.error("Text search error:", error);
+      toast({ title: "Search failed", description: "Failed to search products.", variant: "destructive" });
     }
   };
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSearch();
-  };
+  const handleNotificationClick = () => setNotificationsOpen(!notificationsOpen);
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === "Enter") handleSearch(); };
 
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex-shrink-0">
-            <Link
-              to="/"
-              className="text-2xl font-bold text-charcoal hover:text-sage transition-colors"
-            >
+            <Link to="/" className="text-2xl font-bold text-charcoal hover:text-sage transition-colors">
               Gems Furniture
             </Link>
           </div>
 
-          {/* Search Bar */}
           <div className="flex-1 max-w-xl mx-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -161,50 +174,16 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Navigation Items */}
           <div className="flex items-center space-x-6">
-            <Link
-              to="/products"
-              className="text-foreground hover:text-sage transition-colors hidden md:block"
-            >
-              Products
-            </Link>
-            {user && (
-              <Link
-                to="/orders"
-                className="text-foreground hover:text-sage transition-colors hidden md:block"
-              >
-                Orders
-              </Link>
-            )}
-            {userRole === "admin" && (
-              <Link
-                to="/admin"
-                className="text-foreground hover:text-sage transition-colors hidden md:block"
-              >
-                Admin
-              </Link>
-            )}
+            <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">Products</Link>
+            {user && <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">Orders</Link>}
+            {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Admin</Link>}
 
-            {/* Notifications */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative p-2 h-10 w-10"
-              onClick={handleNotificationClick}
-            >
+            <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10" onClick={handleNotificationClick}>
               <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-              {unreadCount > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium"
-                >
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </Badge>
-              )}
+              {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium">{unreadCount > 99 ? "99+" : unreadCount}</Badge>}
             </Button>
 
-            {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
               {user ? (
                 <DropdownMenu>
@@ -219,34 +198,19 @@ const Navigation = () => {
                       <Link to="/profile">Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={signOut}>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
+                      <LogOut className="h-4 w-4 mr-2" />Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link to="/auth">
-                  <Button variant="ghost" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Button>
-                </Link>
+                <Link to="/auth"><Button variant="ghost" size="sm"><User className="h-4 w-4 mr-2" />Sign In</Button></Link>
               )}
             </div>
-
-            {/* Mobile Menu */}
-            <Button variant="ghost" size="sm" className="md:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
+            <Button variant="ghost" size="sm" className="md:hidden"><Menu className="h-5 w-5" /></Button>
           </div>
         </div>
       </div>
-
-      {/* Notifications Panel */}
-      <Notifications
-        isOpen={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-      />
+      <Notifications isOpen={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </nav>
   );
 };
