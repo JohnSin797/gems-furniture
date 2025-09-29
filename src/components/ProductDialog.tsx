@@ -9,25 +9,46 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploadSelector } from "./ImageUploadSelector";
 
+// ----------------------
+// Define Product types
+// ----------------------
+export type ProductStatus = "active" | "inactive" | "discontinued";
+
+export interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category: string;
+  type?: string;
+  image_url?: string;
+  status: ProductStatus;
+  inventory?: { quantity: number }[];
+}
+
 interface ProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product?: any;
+  product?: Product;
   onSave: () => void;
 }
 
+// ----------------------
+// Component
+// ----------------------
 export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDialogProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
-    price: string;
+    price: string; // keep as string for <input>, parse later
     category: string;
     type: string;
     image_url: string;
-    status: "active" | "inactive" | "discontinued";
-    stock: string;
+    status: ProductStatus;
+    stock: string; // keep as string for <input>, parse later
   }>({
     name: "",
     description: "",
@@ -36,20 +57,21 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
     type: "",
     image_url: "",
     status: "active",
-    stock: ""
+    stock: "",
   });
 
+  // Load product data into form when editing
   useEffect(() => {
     if (product) {
       setFormData({
-        name: product.name || "",
-        description: product.description || "",
-        price: product.price?.toString() || "",
-        category: product.category || "",
-        type: product.type || "",
-        image_url: product.image_url || "",
-        status: product.status || "active",
-        stock: product.inventory?.[0]?.quantity?.toString() || "0"
+        name: product.name ?? "",
+        description: product.description ?? "",
+        price: product.price.toString(),
+        category: product.category ?? "",
+        type: product.type ?? "",
+        image_url: product.image_url ?? "",
+        status: product.status ?? "active",
+        stock: product.inventory?.[0]?.quantity?.toString() ?? "0",
       });
     } else {
       setFormData({
@@ -60,13 +82,14 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         type: "",
         image_url: "",
         status: "active",
-        stock: ""
+        stock: "",
       });
     }
   }, [product, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!formData.name || !formData.price || !formData.category) {
       toast({
         title: "Validation Error",
@@ -91,51 +114,44 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
       if (product) {
         // Update existing product
         const { error: productError } = await supabase
-          .from('products')
+          .from("products")
           .update(productData)
-          .eq('id', product.id);
+          .eq("id", product.id);
 
         if (productError) throw productError;
 
-        // Update inventory
         const { error: inventoryError } = await supabase
-          .from('inventory')
-          .update({ quantity: parseInt(formData.stock) })
-          .eq('product_id', product.id);
+          .from("inventory")
+          .update({ quantity: parseInt(formData.stock, 10) })
+          .eq("product_id", product.id);
 
         if (inventoryError) throw inventoryError;
 
-        toast({
-          title: "Success",
-          description: "Product updated successfully",
-        });
+        toast({ title: "Success", description: "Product updated successfully" });
       } else {
         // Create new product
         const { data: newProduct, error: productError } = await supabase
-          .from('products')
+          .from("products")
           .insert(productData)
           .select()
-          .single();
+          .single<Product>();
 
         if (productError) throw productError;
+        if (!newProduct) throw new Error("Product insert failed");
 
-        // Update inventory for new product (inventory record is auto-created by trigger)
         const { error: inventoryError } = await supabase
-          .from('inventory')
-          .update({ quantity: parseInt(formData.stock) })
-          .eq('product_id', newProduct.id);
+          .from("inventory")
+          .update({ quantity: parseInt(formData.stock, 10) })
+          .eq("product_id", newProduct.id);
 
         if (inventoryError) throw inventoryError;
 
-        toast({
-          title: "Success",
-          description: "Product created successfully",
-        });
+        toast({ title: "Success", description: "Product created successfully" });
       }
 
       onSave();
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error("Error saving product:", error);
       toast({
         title: "Error",
         description: "Failed to save product",
@@ -152,14 +168,14 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         <DialogHeader>
           <DialogTitle>{product ? "Edit Product" : "Add New Product"}</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Product Name *</Label>
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="Enter product name"
               required
             />
@@ -170,7 +186,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Enter product description"
               rows={3}
             />
@@ -184,7 +200,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
                 type="number"
                 step="0.01"
                 value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
                 placeholder="0.00"
                 required
               />
@@ -196,7 +212,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
                 id="stock"
                 type="number"
                 value={formData.stock}
-                onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, stock: e.target.value }))}
                 placeholder="0"
               />
             </div>
@@ -206,7 +222,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             <Label htmlFor="category">Category *</Label>
             <Select
               value={formData.category}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+              onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
@@ -228,23 +244,21 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             <Input
               id="type"
               value={formData.type}
-              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value }))}
               placeholder="e.g., Sofa, Chair, Table"
             />
           </div>
 
           <ImageUploadSelector
             value={formData.image_url}
-            onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+            onChange={(url) => setFormData((prev) => ({ ...prev, image_url: url }))}
           />
 
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
               value={formData.status}
-              onValueChange={(value: "active" | "inactive" | "discontinued") => 
-                setFormData(prev => ({ ...prev, status: value }))
-              }
+              onValueChange={(value: ProductStatus) => setFormData((prev) => ({ ...prev, status: value }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -258,12 +272,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

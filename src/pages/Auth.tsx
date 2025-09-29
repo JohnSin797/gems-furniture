@@ -1,49 +1,54 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { useNotifications } from '@/hooks/useNotifications';
-import Navigation from '@/components/Navigation';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
+import Navigation from "@/components/Navigation";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { user, userRole, loading } = useAuth();
   const { toast } = useToast();
   const { createNotification } = useNotifications();
-  
+
   const [isLoading, setIsLoading] = useState(false);
-  const [signInData, setSignInData] = useState({ email: '', password: '' });
+  const [signInData, setSignInData] = useState({ email: "", password: "" });
   const [signUpData, setSignUpData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user && userRole) {
-      if (userRole === 'admin') {
-        navigate('/admin');
+      if (userRole === "admin") {
+        navigate("/admin");
       } else {
-        navigate('/');
+        navigate("/");
       }
     }
   }, [user, userRole, loading, navigate]);
 
   const cleanupAuthState = () => {
-    localStorage.removeItem('supabase.auth.token');
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+    localStorage.removeItem("supabase.auth.token");
+    Object.keys(localStorage).forEach((key: string) => {
+      if (key.startsWith("supabase.auth.") || key.includes("sb-")) {
         localStorage.removeItem(key);
       }
     });
@@ -54,31 +59,22 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Clean up existing state
       cleanupAuthState();
-      
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
+      await supabase.auth.signOut(); // no options in v2
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: signInData.email,
         password: signInData.password,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (data.user) {
+      if (data?.user) {
         toast({
           title: "Success",
           description: "Signed in successfully!",
         });
 
-        // Create welcome notification
         await createNotification(
           data.user.id,
           "Welcome back!",
@@ -86,13 +82,14 @@ const Auth = () => {
           "success"
         );
 
-        // Force page reload for clean state
-        window.location.href = '/';
+        // Reload for clean state
+        window.location.href = "/";
       }
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to sign in";
       toast({
         title: "Error",
-        description: error.message || "Failed to sign in",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -102,7 +99,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (signUpData.password !== signUpData.confirmPassword) {
       toast({
         title: "Error",
@@ -115,17 +112,11 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Clean up existing state
       cleanupAuthState();
-      
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
+      await supabase.auth.signOut();
 
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { data, error } = await supabase.auth.signUp({
         email: signUpData.email,
         password: signUpData.password,
@@ -134,24 +125,25 @@ const Auth = () => {
           data: {
             first_name: signUpData.firstName,
             last_name: signUpData.lastName,
-          }
-        }
+          },
+        },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (data.user) {
+      if (data?.user) {
         toast({
           title: "Success",
-          description: "Account created successfully! Please check your email to verify your account.",
+          description:
+            "Account created successfully! Please check your email to verify your account.",
         });
       }
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to create account";
       toast({
         title: "Error",
-        description: error.message || "Failed to create account",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -160,7 +152,11 @@ const Auth = () => {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -180,7 +176,8 @@ const Auth = () => {
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
-              
+
+              {/* --- SIGN IN --- */}
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
@@ -190,7 +187,9 @@ const Auth = () => {
                       type="email"
                       placeholder="Enter your email"
                       value={signInData.email}
-                      onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
+                      onChange={(e) =>
+                        setSignInData({ ...signInData, email: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -201,7 +200,12 @@ const Auth = () => {
                       type="password"
                       placeholder="Enter your password"
                       value={signInData.password}
-                      onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
+                      onChange={(e) =>
+                        setSignInData({
+                          ...signInData,
+                          password: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -212,11 +216,12 @@ const Auth = () => {
                     </Label>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Signing in...' : 'Sign In'}
+                    {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
               </TabsContent>
-              
+
+              {/* --- SIGN UP --- */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -226,7 +231,12 @@ const Auth = () => {
                         id="firstName"
                         placeholder="John"
                         value={signUpData.firstName}
-                        onChange={(e) => setSignUpData({ ...signUpData, firstName: e.target.value })}
+                        onChange={(e) =>
+                          setSignUpData({
+                            ...signUpData,
+                            firstName: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -236,7 +246,12 @@ const Auth = () => {
                         id="lastName"
                         placeholder="Doe"
                         value={signUpData.lastName}
-                        onChange={(e) => setSignUpData({ ...signUpData, lastName: e.target.value })}
+                        onChange={(e) =>
+                          setSignUpData({
+                            ...signUpData,
+                            lastName: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -248,7 +263,9 @@ const Auth = () => {
                       type="email"
                       placeholder="Enter your email"
                       value={signUpData.email}
-                      onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
+                      onChange={(e) =>
+                        setSignUpData({ ...signUpData, email: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -259,7 +276,12 @@ const Auth = () => {
                       type="password"
                       placeholder="Create a password"
                       value={signUpData.password}
-                      onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          password: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -270,12 +292,17 @@ const Auth = () => {
                       type="password"
                       placeholder="Confirm your password"
                       value={signUpData.confirmPassword}
-                      onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Creating account...' : 'Create Account'}
+                    {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
               </TabsContent>
