@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-furniture.jpg";
 
 const Hero = () => {
@@ -22,21 +21,6 @@ const Hero = () => {
         <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
           Discover our curated collection of premium furniture that transforms houses into homes
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            size="lg" 
-            className="bg-white text-charcoal hover:bg-white/90 px-8 py-4 text-lg font-semibold"
-          >
-            Shop Collection
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg"
-            className="border-white text-white hover:bg-white hover:text-charcoal px-8 py-4 text-lg font-semibold"
-          >
-            Browse Catalog
-          </Button>
-        </div>
       </div>
     </section>
   );
