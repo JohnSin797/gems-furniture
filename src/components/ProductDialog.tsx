@@ -23,13 +23,16 @@ export interface Product {
   type?: string;
   image_url?: string;
   status: ProductStatus;
+}
+
+export interface ProductWithInventory extends Product {
   inventory?: { quantity: number }[];
 }
 
 interface ProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product?: Product;
+  product?: ProductWithInventory;
   onSave: () => void;
 }
 
@@ -43,12 +46,12 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
-    price: string; // keep as string for <input>, parse later
+    price: string;
     category: string;
     type: string;
     image_url: string;
     status: ProductStatus;
-    stock: string; // keep as string for <input>, parse later
+    stock: string;
   }>({
     name: "",
     description: "",
@@ -141,8 +144,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
 
         const { error: inventoryError } = await supabase
           .from("inventory")
-          .update({ quantity: parseInt(formData.stock, 10) })
-          .eq("product_id", newProduct.id);
+          .insert({ product_id: newProduct.id, quantity: parseInt(formData.stock, 10) });
 
         if (inventoryError) throw inventoryError;
 
@@ -170,6 +172,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">Product Name *</Label>
             <Input
@@ -181,6 +184,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             />
           </div>
 
+          {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -192,6 +196,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             />
           </div>
 
+          {/* Price + Stock */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price">Price *</Label>
@@ -218,6 +223,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             </div>
           </div>
 
+          {/* Category */}
           <div className="space-y-2">
             <Label htmlFor="category">Category *</Label>
             <Select
@@ -239,6 +245,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             </Select>
           </div>
 
+          {/* Type */}
           <div className="space-y-2">
             <Label htmlFor="type">Type</Label>
             <Input
@@ -249,11 +256,13 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             />
           </div>
 
+          {/* Image Upload */}
           <ImageUploadSelector
             value={formData.image_url}
             onChange={(url) => setFormData((prev) => ({ ...prev, image_url: url }))}
           />
 
+          {/* Status */}
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
@@ -271,6 +280,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             </Select>
           </div>
 
+          {/* Actions */}
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
