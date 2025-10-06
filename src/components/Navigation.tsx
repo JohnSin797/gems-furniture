@@ -175,24 +175,23 @@ const Navigation = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">Products</Link>
-            {user && <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">Orders</Link>}
-            {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Admin</Link>}
+             <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">Products</Link>
+             {user && <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">Orders</Link>}
+             {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Admin</Link>}
 
-            <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10" onClick={handleNotificationClick}>
-              <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+            <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10 rounded-full hover:bg-terracotta/10" onClick={handleNotificationClick}>
+              <Bell className="h-5 w-5 text-muted-foreground hover:text-terracotta" />
               {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium">{unreadCount > 99 ? "99+" : unreadCount}</Badge>}
             </Button>
 
             <div className="hidden md:flex items-center space-x-2">
               {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <User className="h-4 w-4 mr-2" />
-                      {user.user_metadata?.full_name || user.email}
-                    </Button>
-                  </DropdownMenuTrigger>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                       <Button variant="ghost" size="icon" className="rounded-full hover:bg-terracotta/10">
+                         <User className="h-4 w-4 text-muted-foreground hover:text-terracotta" />
+                       </Button>
+                    </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link to="/profile">Profile</Link>
@@ -203,7 +202,7 @@ const Navigation = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link to="/auth"><Button variant="ghost" size="sm"><User className="h-4 w-4 mr-2" />Sign In</Button></Link>
+                  <Link to="/auth"><Button variant="ghost" size="icon" className="rounded-full hover:bg-terracotta/10"><User className="h-4 w-4 text-muted-foreground hover:text-terracotta" /></Button></Link>
               )}
             </div>
             <Button variant="ghost" size="sm" className="md:hidden"><Menu className="h-5 w-5" /></Button>
