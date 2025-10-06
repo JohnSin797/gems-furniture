@@ -1,13 +1,17 @@
 import Navigation from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+
 import { Package, Eye } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import type { Database } from "@/integrations/supabase/types";
 
 interface OrderItem {
   id: string;
@@ -18,22 +22,26 @@ interface OrderItem {
   total_price: number;
 }
 
+type OrderStatus = Database["public"]["Enums"]["order_status"];
+
 interface Order {
-  id: string;
-  order_number: string;
-  status: string;
-  total_amount: number;
-  subtotal: number;
-  shipping_amount: number;
-  created_at: string;
-  order_items: OrderItem[];
-}
+   id: string;
+   order_number: string;
+   status: OrderStatus;
+   total_amount: number;
+   subtotal: number;
+   shipping_amount: number;
+   created_at: string;
+   user_id: string;
+   order_items: OrderItem[];
+ }
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const { user, userRole } = useAuth();
+  const { createNotification } = useNotifications();
   const { toast } = useToast();
 
   const fetchOrders = useCallback(async () => {
@@ -67,7 +75,48 @@ const Orders = () => {
     }
   }, [user, userRole, toast]);
 
+  const updateOrderStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', orderId);
 
+      if (error) throw error;
+
+      // Update local state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      // Create notification for the user if status is confirmed
+      if (newStatus === 'confirmed') {
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+          await createNotification(
+            order.user_id,
+            "Order Confirmed",
+            `Your order ${order.order_number} has been confirmed and is now being processed.`,
+            "success"
+          );
+        }
+      }
+
+      toast({
+        title: "Status Updated",
+        description: `Order status changed to ${newStatus}`,
+      });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update order status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [toast, orders, createNotification]);
 
   const toggleOrderDetails = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -125,48 +174,68 @@ const Orders = () => {
         ) : (
           <div className="space-y-6">
             {orders.map((order) => (
-              <Card key={order.id} className="overflow-hidden">
-                <CardContent className="p-6">
-                  {/* Order Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                    <div className="flex items-center space-x-4 mb-2 sm:mb-0">
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          Order {order.order_number}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Placed on {format(new Date(order.created_at), 'MMM dd, yyyy')}
-                        </p>
+               <Card key={order.id} className="overflow-hidden">
+                  <CardContent className="p-4">
+                   {/* Order Header */}
+                   <div className="flex flex-col sm:flex-row mb-4">
+                      <div className="flex items-center space-x-4 mr-10 mb-2 sm:mb-0">
+                        <div>
+                          <h3 className="font-semibold text-foreground">
+                            Order {order.order_number}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Placed on {format(new Date(order.created_at), 'MMM dd, yyyy')}
+                          </p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className="text-sm text-muted-foreground">Status:</span>
+                            <Badge variant={
+                              order.status === 'delivered' ? 'default' :
+                              order.status === 'shipped' ? 'secondary' :
+                              order.status === 'cancelled' ? 'destructive' :
+                              'outline'
+                            }>
+                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </Badge>
+                             {userRole === 'admin' && (
+                               <Button
+                                 size="sm"
+                                 onClick={() => updateOrderStatus(order.id, "confirmed")}
+                                 disabled={order.status === 'confirmed'}
+                               >
+                                 Confirm
+                               </Button>
+                             )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                     <div className="flex items-center space-x-4">
-                       <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleOrderDetails(order.id)}
-                        className="flex items-center space-x-1"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span>{expandedOrder === order.id ? 'Hide' : 'View'} Details</span>
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Order Summary */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Items</p>
-                      <p className="font-semibold">{order.order_items?.length || 0}</p>
-                    </div>
-                     <div>
-                       <p className="text-sm text-muted-foreground">Subtotal</p>
-                       <p className="font-semibold">${order.subtotal.toFixed(2)}</p>
+                     <div className="flex-1 flex justify-center mb-2 sm:mb-0 md:px-8 sm:px-4">
+                       <div className="grid grid-cols-3 w-full md:px-4 gap-4">
+                         <div>
+                           <p className="text-sm text-muted-foreground">Items</p>
+                           <p className="font-semibold">{order.order_items?.length || 0}</p>
+                         </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Subtotal</p>
+                            <p className="font-semibold">${order.subtotal.toFixed(2)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Total</p>
+                            <p className="font-semibold">${order.total_amount.toFixed(2)}</p>
+                          </div>
+                       </div>
                      </div>
-                     <div>
-                       <p className="text-sm text-muted-foreground">Total</p>
-                       <p className="font-semibold text-lg">${order.total_amount.toFixed(2)}</p>
+                      <div className="flex items-center space-x-4">
+                        <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => toggleOrderDetails(order.id)}
+                         className="flex items-center space-x-1"
+                       >
+                         <Eye className="h-4 w-4" />
+                         <span>{expandedOrder === order.id ? 'Hide' : 'View'} Details</span>
+                       </Button>
                      </div>
-                  </div>
+                   </div>
 
                   {/* Order Details */}
                   {expandedOrder === order.id && (
