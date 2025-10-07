@@ -40,7 +40,7 @@ const Auth = () => {
       if (userRole === "admin") {
         navigate("/admin");
       } else {
-        navigate("/");
+        navigate("/products");
       }
     }
   }, [user, userRole, loading, navigate]);
@@ -82,8 +82,7 @@ const Auth = () => {
           "success"
         );
 
-        // Reload for clean state
-        window.location.href = "/";
+        // Navigation will be handled by useEffect when userRole is available
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to sign in";
