@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import ProductCard from "@/components/ProductCard";
+import FeaturedProducts from "@/components/FeaturedProducts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -113,9 +114,12 @@ const Products = () => {
               <button onClick={() => { setTextSearchActive(false); setTextSearchQuery(""); filterAndSortProducts(); }} className="text-sm text-primary hover:underline">← Back to all products</button>
             </div>
           )}
-        </div>
+         </div>
 
-        {/* Filters */}
+          {/* Featured Collection */}
+          {!imageSearchActive && !textSearchActive && <FeaturedProducts showViewAllButton={false} maxItems={6} showPagination={true} />}
+
+         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex items-center gap-2"><Filter className="h-4 w-4" /><span className="text-sm font-medium">Filter by:</span></div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}><SelectTrigger className="w-[180px]"><SelectValue placeholder="Category" /></SelectTrigger><SelectContent>
