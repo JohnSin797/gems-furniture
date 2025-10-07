@@ -1,4 +1,5 @@
 import Navigation from "@/components/Navigation";
+import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -206,7 +207,11 @@ const Orders = () => {
   }, [user, userRole, fetchAllOrders]);
 
   if (loading) {
-    return (
+    return userRole === 'admin' ? (
+      <AdminLayout>
+        <div className="text-center">Loading orders...</div>
+      </AdminLayout>
+    ) : (
       <div className="min-h-screen bg-background">
         <Navigation />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -216,11 +221,8 @@ const Orders = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  const content = (
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">
             {userRole === 'admin' ? 'Orders' : 'My Orders'}
@@ -475,9 +477,15 @@ const Orders = () => {
                  ))}
                </div>
              )}
-           </TabsContent>
-        </Tabs>
-      </main>
+            </TabsContent>
+         </Tabs>
+    </main>
+  );
+
+  return userRole === 'admin' ? <AdminLayout>{content}</AdminLayout> : (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      {content}
     </div>
   );
 };

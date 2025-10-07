@@ -1,4 +1,5 @@
 import Navigation from "@/components/Navigation";
+import AdminLayout from "@/components/AdminLayout";
 import ProductCard from "@/components/ProductCard";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Product {
   id: string;
@@ -33,6 +35,7 @@ const Products = () => {
   const [textSearchActive, setTextSearchActive] = useState(false);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [textSearchQuery, setTextSearchQuery] = useState("");
+  const { userRole } = useAuth();
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -89,12 +92,14 @@ const Products = () => {
 
   useEffect(() => { filterAndSortProducts(); }, [products, categoryFilter, typeFilter, sortBy, filterAndSortProducts]);
 
-  if (loading) return (<div className="min-h-screen bg-background"><Navigation /><main className="max-w-7xl mx-auto px-4 py-8 text-center">Loading products...</main></div>);
-
-  return (
+  if (loading) return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {userRole === 'admin' ? <AdminLayout><div className="text-center">Loading products...</div></AdminLayout> : <><Navigation /><main className="max-w-7xl mx-auto px-4 py-8 text-center">Loading products...</main></>}
+    </div>
+  );
+
+  const content = (
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">{imageSearchActive ? "Image Search Results" : textSearchActive ? "Search Results" : "Products"}</h1>
           <p className="text-muted-foreground mb-4">{imageSearchActive ? "Products matching your uploaded image" : textSearchActive ? `Products matching "${textSearchQuery}"` : "Discover our curated collection of premium furniture"}</p>
@@ -155,6 +160,12 @@ const Products = () => {
 
         {filteredProducts.length === 0 && <div className="text-center py-12"><p className="text-muted-foreground">No products found matching your criteria.</p></div>}
       </main>
+  );
+
+  return userRole === 'admin' ? <AdminLayout>{content}</AdminLayout> : (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      {content}
     </div>
   );
 };

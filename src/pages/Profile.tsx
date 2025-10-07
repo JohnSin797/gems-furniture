@@ -1,4 +1,5 @@
 import Navigation from "@/components/Navigation";
+import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,7 +150,11 @@ const Profile = () => {
   };
 
   if (loading) {
-    return (
+    return userRole === 'admin' ? (
+      <AdminLayout>
+        <div className="text-center">Loading profile...</div>
+      </AdminLayout>
+    ) : (
       <div className="min-h-screen bg-background">
         <Navigation />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -159,11 +164,8 @@ const Profile = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  const content = (
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">My Profile</h1>
           <p className="text-muted-foreground">Manage your account information</p>
@@ -338,7 +340,13 @@ const Profile = () => {
             </Card>
           </div>
         </div>
-      </main>
+    </main>
+  );
+
+  return userRole === 'admin' ? <AdminLayout>{content}</AdminLayout> : (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      {content}
     </div>
   );
 };

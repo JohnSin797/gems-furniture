@@ -134,50 +134,52 @@ const Navigation = () => {
             </Link>
           </div>
 
-          <div className="flex-1 max-w-xl mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search products..."
-                className="w-full pl-10 pr-12"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-10 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                onClick={handleSearch}
-                disabled={!searchQuery.trim()}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                onClick={handleCameraClick}
-                disabled={isProcessingImage}
-              >
-                <Camera className={`h-4 w-4 ${isProcessingImage ? "animate-pulse" : ""}`} />
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={handleImageCapture}
-              />
-            </div>
-          </div>
+           {userRole !== "admin" && (
+             <div className="flex-1 max-w-xl mx-8">
+               <div className="relative">
+                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                 <Input
+                   type="text"
+                   placeholder="Search products..."
+                   className="w-full pl-10 pr-12"
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                   onKeyDown={handleSearchKeyDown}
+                 />
+                 <Button
+                   variant="ghost"
+                   size="sm"
+                   className="absolute right-10 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                   onClick={handleSearch}
+                   disabled={!searchQuery.trim()}
+                 >
+                   <Search className="h-4 w-4" />
+                 </Button>
+                 <Button
+                   variant="ghost"
+                   size="sm"
+                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                   onClick={handleCameraClick}
+                   disabled={isProcessingImage}
+                 >
+                   <Camera className={`h-4 w-4 ${isProcessingImage ? "animate-pulse" : ""}`} />
+                 </Button>
+                 <input
+                   ref={fileInputRef}
+                   type="file"
+                   accept="image/*"
+                   capture="environment"
+                   className="hidden"
+                   onChange={handleImageCapture}
+                 />
+               </div>
+             </div>
+           )}
 
           <div className="flex items-center space-x-6">
              <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">Products</Link>
              {user && <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">Orders</Link>}
-             {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Admin</Link>}
+              {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Dashboard</Link>}
 
             <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10 rounded-full hover:bg-terracotta/10" onClick={handleNotificationClick}>
               <Bell className="h-5 w-5 text-muted-foreground hover:text-terracotta" />
