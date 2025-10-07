@@ -36,6 +36,14 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
   const [loading, setLoading] = useState(false);
   const [addressLoading, setAddressLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editedAddress, setEditedAddress] = useState({
+    street_address: "",
+    barangay: "",
+    city: "",
+    province: "",
+    zip_code: "",
+  });
   const { user } = useAuth();
   const { toast } = useToast();
   const { createNotification } = useNotifications();
@@ -58,6 +66,15 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
       }
 
       setAddress(data || null);
+      if (data) {
+        setEditedAddress({
+          street_address: data.street_address || "",
+          barangay: data.barangay || "",
+          city: data.city || "",
+          province: data.province || "",
+          zip_code: data.zip_code || "",
+        });
+      }
     } catch (error) {
       console.error('Error fetching address:', error);
       toast({
@@ -79,6 +96,35 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
   const handleQuantityChange = (delta: number) => {
     const newQuantity = Math.max(1, quantity + delta);
     setQuantity(newQuantity);
+  };
+
+  const handleEditAddress = () => {
+    setIsEditingAddress(true);
+  };
+
+  const handleSaveAddress = () => {
+    setAddress({
+      street_address: editedAddress.street_address || null,
+      barangay: editedAddress.barangay || null,
+      city: editedAddress.city || null,
+      province: editedAddress.province || null,
+      zip_code: editedAddress.zip_code || null,
+    });
+    setIsEditingAddress(false);
+  };
+
+  const handleCancelEdit = () => {
+    // Reset edited address to current address
+    if (address) {
+      setEditedAddress({
+        street_address: address.street_address || "",
+        barangay: address.barangay || "",
+        city: address.city || "",
+        province: address.province || "",
+        zip_code: address.zip_code || "",
+      });
+    }
+    setIsEditingAddress(false);
   };
 
   const handleConfirmPurchase = () => {
@@ -108,13 +154,19 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
            shipping_amount: 0,
           total_amount: total,
           order_number: `ORD-${Date.now()}`,
-          shipping_address: address ? {
-            street: address.street_address,
-            barangay: address.barangay,
-            city: address.city,
-            province: address.province,
-            zip_code: address.zip_code,
-          } : null,
+           shipping_address: isEditingAddress ? {
+             street: editedAddress.street_address,
+             barangay: editedAddress.barangay,
+             city: editedAddress.city,
+             province: editedAddress.province,
+             zip_code: editedAddress.zip_code,
+           } : address ? {
+             street: address.street_address,
+             barangay: address.barangay,
+             city: address.city,
+             province: address.province,
+             zip_code: address.zip_code,
+           } : null,
         })
         .select()
         .single();
@@ -160,6 +212,20 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const isAddressEmpty = (addr: AddressData | null) => {
+    if (!addr) return true;
+
+    const parts = [
+      addr.street_address,
+      addr.barangay,
+      addr.city,
+      addr.province,
+      addr.zip_code
+    ].filter(Boolean);
+
+    return parts.length === 0;
   };
 
   const formatAddress = (addr: AddressData | null) => {
@@ -228,20 +294,109 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
 
           {/* Address */}
           <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <MapPin className="h-4 w-4" />
-              <span>Shipping Address</span>
-            </Label>
-            <div className="p-3 bg-muted rounded-md">
-              {addressLoading ? (
-                <p className="text-sm text-muted-foreground">Loading address...</p>
-              ) : (
-                <p className="text-sm">{formatAddress(address)}</p>
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center space-x-2">
+                <MapPin className="h-4 w-4" />
+                <span>Shipping Address</span>
+              </Label>
+              {!addressLoading && !isEditingAddress && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEditAddress}
+                >
+                  Edit
+                </Button>
               )}
             </div>
-            {!address && !addressLoading && (
+
+            {isEditingAddress ? (
+              <div className="space-y-3 p-3 border rounded-md">
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="street_address" className="text-xs">Street Address</Label>
+                    <Input
+                      id="street_address"
+                      value={editedAddress.street_address}
+                      onChange={(e) => setEditedAddress(prev => ({ ...prev, street_address: e.target.value }))}
+                      placeholder="Enter street address"
+                      className="h-8"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="barangay" className="text-xs">Barangay</Label>
+                      <Input
+                        id="barangay"
+                        value={editedAddress.barangay}
+                        onChange={(e) => setEditedAddress(prev => ({ ...prev, barangay: e.target.value }))}
+                        placeholder="Barangay"
+                        className="h-8"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="city" className="text-xs">City</Label>
+                      <Input
+                        id="city"
+                        value={editedAddress.city}
+                        onChange={(e) => setEditedAddress(prev => ({ ...prev, city: e.target.value }))}
+                        placeholder="City"
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="province" className="text-xs">Province</Label>
+                      <Input
+                        id="province"
+                        value={editedAddress.province}
+                        onChange={(e) => setEditedAddress(prev => ({ ...prev, province: e.target.value }))}
+                        placeholder="Province"
+                        className="h-8"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="zip_code" className="text-xs">ZIP Code</Label>
+                      <Input
+                        id="zip_code"
+                        value={editedAddress.zip_code}
+                        onChange={(e) => setEditedAddress(prev => ({ ...prev, zip_code: e.target.value }))}
+                        placeholder="ZIP Code"
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveAddress}
+                  >
+                    Save Address
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 bg-muted rounded-md">
+                {addressLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading address...</p>
+                ) : (
+                  <p className="text-sm">{formatAddress(address)}</p>
+                )}
+              </div>
+            )}
+
+            {!address && !addressLoading && !isEditingAddress && (
               <p className="text-xs text-muted-foreground">
-                Please update your address in your profile settings.
+                Please update your address in your profile settings or click Edit to add one.
               </p>
             )}
           </div>
@@ -271,7 +426,13 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
           </Button>
           <Button
             onClick={handleConfirmPurchase}
-            disabled={loading || !address}
+            disabled={loading || (isEditingAddress ? isAddressEmpty({
+              street_address: editedAddress.street_address || null,
+              barangay: editedAddress.barangay || null,
+              city: editedAddress.city || null,
+              province: editedAddress.province || null,
+              zip_code: editedAddress.zip_code || null,
+            }) : isAddressEmpty(address))}
           >
             {loading ? "Processing..." : "Confirm Purchase"}
           </Button>
