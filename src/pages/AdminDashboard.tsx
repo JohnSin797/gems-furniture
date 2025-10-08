@@ -109,6 +109,7 @@ const AdminDashboard = () => {
             updated_at
           )
         `)
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -248,17 +249,20 @@ const AdminDashboard = () => {
   }, [toast]);
 
   // Handle product actions
-  const handleDeleteProduct = async (productId: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+  const handleArchiveProduct = async (productId: string) => {
+    if (!confirm("Are you sure you want to archive this product? It will be moved to the archive and can be restored later.")) return;
     try {
-      const { error } = await supabase.from("products").delete().eq("id", productId);
+      const { error } = await supabase
+        .from("products")
+        .update({ status: 'inactive' })
+        .eq("id", productId);
       if (error) throw error;
-      toast({ title: "Success", description: "Product deleted successfully" });
+      toast({ title: "Success", description: "Product archived successfully" });
       fetchProducts();
       fetchStats();
     } catch (error) {
-      console.error("Error deleting product:", error);
-      toast({ title: "Error", description: "Failed to delete product", variant: "destructive" });
+      console.error("Error archiving product:", error);
+      toast({ title: "Error", description: "Failed to archive product", variant: "destructive" });
     }
   };
 
@@ -444,9 +448,9 @@ const AdminDashboard = () => {
                           <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
                             <Edit className="h-3 w-3" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                           <Button variant="outline" size="sm" onClick={() => handleArchiveProduct(product.id)}>
+                             <Trash2 className="h-3 w-3" />
+                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, User, LogOut, LayoutDashboard, Package, ShoppingCart, Users, Settings } from "lucide-react";
+import { Bell, User, LogOut, LayoutDashboard, Package, ShoppingCart, Users, Settings, Archive } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import Notifications from "@/components/Notifications";
@@ -49,6 +49,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       url: "/products",
       icon: Package,
       isActive: location.pathname === "/products",
+    },
+    {
+      title: "Archive",
+      url: "/archive",
+      icon: Archive,
+      isActive: location.pathname === "/archive",
     },
     {
       title: "Orders",

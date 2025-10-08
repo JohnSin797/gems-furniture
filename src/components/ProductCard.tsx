@@ -19,7 +19,7 @@ interface ProductCardProps {
 const ProductCard = ({ id, name, price, originalPrice, image, category }: ProductCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
 
   const handleBuyNow = () => {
     if (!user) {
@@ -53,14 +53,16 @@ const ProductCard = ({ id, name, price, originalPrice, image, category }: Produc
         </button>
 
         {/* Buy now button */}
-        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-          <Button
-            onClick={handleBuyNow}
-            className="w-full"
-          >
-            Buy Now
-          </Button>
-        </div>
+        {userRole !== 'admin' && (
+          <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+            <Button
+              onClick={handleBuyNow}
+              className="w-full"
+            >
+              Buy Now
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Product Info */}

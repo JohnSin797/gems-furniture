@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
+import Archive from "./pages/Archive";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -33,13 +34,21 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/products" 
+            <Route
+              path="/products"
               element={
                 <ProtectedRoute requireAuth>
                   <Products />
                 </ProtectedRoute>
-              } 
+              }
+            />
+            <Route
+              path="/archive"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <Archive />
+                </ProtectedRoute>
+              }
             />
             <Route
               path="/orders"

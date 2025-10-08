@@ -262,23 +262,25 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             onChange={(url) => setFormData((prev) => ({ ...prev, image_url: url }))}
           />
 
-          {/* Status */}
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value: ProductStatus) => setFormData((prev) => ({ ...prev, status: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="discontinued">Discontinued</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Status - only show when editing existing product */}
+          {product && (
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value: ProductStatus) => setFormData((prev) => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="discontinued">Discontinued</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex justify-end space-x-2 pt-4">
