@@ -14,9 +14,10 @@ interface ProductCardProps {
   originalPrice?: number;
   image: string;
   category: string;
+  stock?: number;
 }
 
-const ProductCard = ({ id, name, price, originalPrice, image, category }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, originalPrice, image, category, stock = 0 }: ProductCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, userRole } = useAuth();
@@ -41,6 +42,15 @@ const ProductCard = ({ id, name, price, originalPrice, image, category }: Produc
         
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+
+        {/* Sold Out overlay */}
+        {stock === 0 && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <span className="bg-red-600 text-white px-4 py-2 rounded-full font-semibold text-lg">
+              Sold Out
+            </span>
+          </div>
+        )}
         
         {/* Heart icon */}
         <button 
@@ -53,7 +63,7 @@ const ProductCard = ({ id, name, price, originalPrice, image, category }: Produc
         </button>
 
         {/* Buy now button */}
-        {userRole !== 'admin' && (
+        {userRole !== 'admin' && stock > 0 && (
           <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
             <Button
               onClick={handleBuyNow}

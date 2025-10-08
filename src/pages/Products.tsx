@@ -20,6 +20,7 @@ interface Product {
   type: string | null;
   created_at: string;
   description?: string;
+  stock: number;
 }
 
 const Products = () => {
@@ -39,10 +40,23 @@ const Products = () => {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const { data, error } = await supabase.from('products').select('*').eq('status', 'active');
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          *,
+          inventory!inner(quantity)
+        `)
+        .eq('status', 'active');
       if (error) throw error;
-      setProducts(data || []);
-      setFilteredProducts(data || []);
+
+      // Transform data to include stock from inventory
+      const productsWithStock = (data || []).map(product => ({
+        ...product,
+        stock: product.inventory?.[0]?.quantity || 0
+      }));
+
+      setProducts(productsWithStock);
+      setFilteredProducts(productsWithStock);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
@@ -154,7 +168,7 @@ const Products = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} />
+            <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} stock={product.stock} />
           ))}
         </div>
 

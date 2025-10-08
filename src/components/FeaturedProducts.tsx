@@ -11,6 +11,7 @@ interface Product {
   price: number;
   image: string;
   category: string;
+  stock: number;
 }
 
 interface FeaturedProductsProps {
@@ -35,7 +36,8 @@ const FeaturedProducts = ({ showViewAllButton = true, maxItems, showPagination =
             name,
             price,
             category,
-            image_url
+            image_url,
+            inventory!inner(quantity)
           )
         `)
         .order('display_order', { ascending: true });
@@ -47,7 +49,8 @@ const FeaturedProducts = ({ showViewAllButton = true, maxItems, showPagination =
         name: item.products.name,
         price: item.products.price,
         image: item.products.image_url || '/placeholder.svg',
-        category: item.products.category
+        category: item.products.category,
+        stock: item.products.inventory?.[0]?.quantity || 0
       })) || [];
     }
   });
