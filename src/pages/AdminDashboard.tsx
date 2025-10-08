@@ -192,6 +192,8 @@ const AdminDashboard = () => {
   // Fetch recent orders
   const fetchRecentOrders = useCallback(async () => {
     try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select(`
@@ -206,6 +208,7 @@ const AdminDashboard = () => {
             quantity
           )
         `)
+        .gte('created_at', today.toISOString())
         .order('created_at', { ascending: false })
         .limit(5);
 
