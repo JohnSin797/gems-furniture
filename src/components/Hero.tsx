@@ -2,7 +2,7 @@ import heroImage from "@/assets/hero-furniture.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative max-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
