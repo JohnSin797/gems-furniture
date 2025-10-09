@@ -171,12 +171,12 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM public.products LIMIT 1) THEN
         -- Insert sample products
         INSERT INTO public.products (name, description, category, price, image_url, status, featured) VALUES
-        ('Oslo Dining Chair', 'Elegant dining chair with oak frame and comfortable upholstery', 'Dining', 299.00, '/src/assets/chair-oak.jpg', 'active', true),
-        ('Sage Velvet Sectional', 'Luxurious sectional sofa in sage green velvet', 'Living Room', 1899.00, '/src/assets/sofa-sage.jpg', 'active', true),
-        ('Walnut Coffee Table', 'Modern coffee table crafted from premium walnut wood', 'Living Room', 649.00, '/src/assets/table-walnut.jpg', 'active', false),
-        ('Brass Nightstand', 'Stylish nightstand with brass accents and ample storage', 'Bedroom', 429.00, '/src/assets/nightstand-wood.jpg', 'active', false),
-        ('Luna Accent Chair', 'Comfortable accent chair perfect for any living space', 'Living Room', 799.00, '/src/assets/armchair-cream.jpg', 'active', true),
-        ('Oak Modular Shelf', 'Versatile modular shelving system in solid oak', 'Office', 549.00, '/src/assets/bookshelf-oak.jpg', 'active', false)
+        ('Oslo Dining Chair', 'Elegant dining chair with oak frame and comfortable upholstery', 'Dining', 299.00, '/assets/chair-oak.jpg', 'active', true),
+        ('Sage Velvet Sectional', 'Luxurious sectional sofa in sage green velvet', 'Living Room', 1899.00, '/assets/sofa-sage.jpg', 'active', true),
+        ('Walnut Coffee Table', 'Modern coffee table crafted from premium walnut wood', 'Living Room', 649.00, '/assets/table-walnut.jpg', 'active', false),
+        ('Brass Nightstand', 'Stylish nightstand with brass accents and ample storage', 'Bedroom', 429.00, '/assets/nightstand-wood.jpg', 'active', false),
+        ('Luna Accent Chair', 'Comfortable accent chair perfect for any living space', 'Living Room', 799.00, '/assets/armchair-cream.jpg', 'active', true),
+        ('Oak Modular Shelf', 'Versatile modular shelving system in solid oak', 'Office', 549.00, '/assets/bookshelf-oak.jpg', 'active', false)
         ON CONFLICT DO NOTHING;
 
         -- Add featured products to featured_collections

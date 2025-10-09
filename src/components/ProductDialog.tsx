@@ -9,9 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploadSelector } from "./ImageUploadSelector";
 
-// ----------------------
-// Define Product types
-// ----------------------
 export type ProductStatus = "active" | "inactive" | "discontinued";
 
 export interface Product {
@@ -26,7 +23,14 @@ export interface Product {
 }
 
 export interface ProductWithInventory extends Product {
-  inventory?: { quantity: number }[];
+  inventory?: {
+    id: string;
+    product_id: string;
+    quantity: number;
+    reorder_level: number;
+    reserved_quantity: number;
+    updated_at: string;
+  } | null;
 }
 
 interface ProductDialogProps {
@@ -36,9 +40,6 @@ interface ProductDialogProps {
   onSave: () => void;
 }
 
-// ----------------------
-// Component
-// ----------------------
 export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDialogProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -50,8 +51,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
     category: string;
     type: string;
     image_url: string;
-    status: ProductStatus;
-    stock: string;
+    quantity: string;
   }>({
     name: "",
     description: "",
@@ -59,8 +59,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
     category: "",
     type: "",
     image_url: "",
-    status: "active",
-    stock: "",
+    quantity: "",
   });
 
   // Load product data into form when editing
@@ -73,8 +72,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         category: product.category ?? "",
         type: product.type ?? "",
         image_url: product.image_url ?? "",
-        status: product.status ?? "active",
-        stock: product.inventory?.[0]?.quantity?.toString() ?? "0",
+        quantity: product.inventory?.quantity?.toString() ?? "0",
       });
     } else {
       setFormData({
@@ -84,8 +82,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         category: "",
         type: "",
         image_url: "",
-        status: "active",
-        stock: "",
+        quantity: "",
       });
     }
   }, [product, open]);
@@ -111,11 +108,13 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         category: formData.category,
         type: formData.type,
         image_url: formData.image_url,
-        status: formData.status,
+        status: "active" as ProductStatus, // ✅ fixed: set default for new items
       };
 
       if (product) {
+        // --------------------
         // Update existing product
+        // --------------------
         const { error: productError } = await supabase
           .from("products")
           .update(productData)
@@ -125,14 +124,24 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
 
         const { error: inventoryError } = await supabase
           .from("inventory")
-          .update({ quantity: parseInt(formData.stock, 10) })
-          .eq("product_id", product.id);
+          .upsert(
+            {
+              product_id: product.id,
+              quantity: parseInt(formData.quantity, 10),
+              reorder_level: 0,
+              reserved_quantity: 0,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "product_id" } // ✅ ensures 1 inventory per product
+          );
 
         if (inventoryError) throw inventoryError;
 
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
+        // --------------------
         // Create new product
+        // --------------------
         const { data: newProduct, error: productError } = await supabase
           .from("products")
           .insert(productData)
@@ -144,7 +153,16 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
 
         const { error: inventoryError } = await supabase
           .from("inventory")
-          .insert({ product_id: newProduct.id, quantity: parseInt(formData.stock, 10) });
+          .upsert(
+            {
+              product_id: newProduct.id,
+              quantity: parseInt(formData.quantity, 10),
+              reorder_level: 0,
+              reserved_quantity: 0,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "product_id" }
+          );
 
         if (inventoryError) throw inventoryError;
 
@@ -216,8 +234,8 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
               <Input
                 id="stock"
                 type="number"
-                value={formData.stock}
-                onChange={(e) => setFormData((prev) => ({ ...prev, stock: e.target.value }))}
+                value={formData.quantity}
+                onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
                 placeholder="0"
               />
             </div>
@@ -261,26 +279,6 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             value={formData.image_url}
             onChange={(url) => setFormData((prev) => ({ ...prev, image_url: url }))}
           />
-
-          {/* Status - only show when editing existing product */}
-          {product && (
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value: ProductStatus) => setFormData((prev) => ({ ...prev, status: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="discontinued">Discontinued</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           {/* Actions */}
           <div className="flex justify-end space-x-2 pt-4">

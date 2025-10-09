@@ -12,15 +12,15 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image_url: string | null;
-  category: string;
-  type: string | null;
-  created_at: string;
-  description?: string;
-  stock: number;
+   id: string;
+   name: string;
+   price: number;
+   image_url: string | null;
+   category: string;
+   type: string | null;
+   created_at: string;
+   description?: string;
+   quantity: number;
 }
 
 const Products = () => {
@@ -44,19 +44,19 @@ const Products = () => {
         .from('products')
         .select(`
           *,
-          inventory!inner(quantity)
+          inventory(quantity)
         `)
         .eq('status', 'active');
       if (error) throw error;
 
-      // Transform data to include stock from inventory
-      const productsWithStock = (data || []).map(product => ({
-        ...product,
-        stock: product.inventory?.[0]?.quantity || 0
-      }));
+       // Transform data to include quantity from inventory
+        const productsWithQuantity = (data || []).map(product => ({
+          ...product,
+          quantity: product.inventory?.quantity || 0
+        }));
 
-      setProducts(productsWithStock);
-      setFilteredProducts(productsWithStock);
+       setProducts(productsWithQuantity);
+       setFilteredProducts(productsWithQuantity);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
@@ -168,7 +168,7 @@ const Products = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} stock={product.stock} />
+             <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} />
           ))}
         </div>
 

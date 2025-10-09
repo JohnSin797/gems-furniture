@@ -6,12 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  stock: number;
+   id: string;
+   name: string;
+   price: number;
+   image: string;
+   category: string;
+   quantity: number;
 }
 
 interface FeaturedProductsProps {
@@ -37,21 +37,21 @@ const FeaturedProducts = ({ showViewAllButton = true, maxItems, showPagination =
             price,
             category,
             image_url,
-            inventory!inner(quantity)
+            inventory(quantity)
           )
         `)
         .order('display_order', { ascending: true });
 
       if (error) throw error;
 
-      return data?.map(item => ({
-        id: item.products.id,
-        name: item.products.name,
-        price: item.products.price,
-        image: item.products.image_url || '/placeholder.svg',
-        category: item.products.category,
-        stock: item.products.inventory?.[0]?.quantity || 0
-      })) || [];
+        return data?.map(item => ({
+          id: item.products.id,
+          name: item.products.name,
+          price: item.products.price,
+          image: item.products.image_url || '/placeholder.svg',
+          category: item.products.category,
+          quantity: item.products.inventory?.quantity || 0
+        })).filter(product => product.quantity > 0) || [];
     }
   });
 
