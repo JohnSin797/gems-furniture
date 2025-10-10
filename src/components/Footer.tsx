@@ -50,16 +50,16 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Stay Updated</h4>
             <p className="text-white/70 mb-4">Get the latest designs and exclusive offers.</p>
-            <div className="flex">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-l focus:outline-none focus:border-sage text-white placeholder-white/50"
-              />
-              <button className="px-6 py-2 bg-sage hover:bg-sage-light text-white rounded-r transition-colors">
-                Subscribe
-              </button>
-            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded sm:rounded-l sm:rounded-r-none focus:outline-none focus:border-sage text-white placeholder-white/50 text-base"
+                />
+                <button className="px-6 py-3 bg-sage hover:bg-sage-light text-white rounded sm:rounded-r sm:rounded-l-none transition-colors whitespace-nowrap text-base font-medium">
+                  Subscribe
+                </button>
+              </div>
           </div>
         </div>
 

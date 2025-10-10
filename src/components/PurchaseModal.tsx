@@ -312,62 +312,62 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
 
             {isEditingAddress ? (
               <div className="space-y-3 p-3 border rounded-md">
-                <div className="grid grid-cols-1 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="street_address" className="text-xs">Street Address</Label>
-                    <Input
-                      id="street_address"
-                      value={editedAddress.street_address}
-                      onChange={(e) => setEditedAddress(prev => ({ ...prev, street_address: e.target.value }))}
-                      placeholder="Enter street address"
-                      className="h-8"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label htmlFor="barangay" className="text-xs">Barangay</Label>
-                      <Input
-                        id="barangay"
-                        value={editedAddress.barangay}
-                        onChange={(e) => setEditedAddress(prev => ({ ...prev, barangay: e.target.value }))}
-                        placeholder="Barangay"
-                        className="h-8"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="city" className="text-xs">City</Label>
-                      <Input
-                        id="city"
-                        value={editedAddress.city}
-                        onChange={(e) => setEditedAddress(prev => ({ ...prev, city: e.target.value }))}
-                        placeholder="City"
-                        className="h-8"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label htmlFor="province" className="text-xs">Province</Label>
-                      <Input
-                        id="province"
-                        value={editedAddress.province}
-                        onChange={(e) => setEditedAddress(prev => ({ ...prev, province: e.target.value }))}
-                        placeholder="Province"
-                        className="h-8"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="zip_code" className="text-xs">ZIP Code</Label>
-                      <Input
-                        id="zip_code"
-                        value={editedAddress.zip_code}
-                        onChange={(e) => setEditedAddress(prev => ({ ...prev, zip_code: e.target.value }))}
-                        placeholder="ZIP Code"
-                        className="h-8"
-                      />
-                    </div>
-                  </div>
-                </div>
+                 <div className="grid grid-cols-1 gap-3">
+                   <div className="space-y-1">
+                     <Label htmlFor="street_address" className="text-xs">Street Address</Label>
+                     <Input
+                       id="street_address"
+                       value={editedAddress.street_address}
+                       onChange={(e) => setEditedAddress(prev => ({ ...prev, street_address: e.target.value }))}
+                       placeholder="Enter street address"
+                       className="h-8"
+                     />
+                   </div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                     <div className="space-y-1">
+                       <Label htmlFor="barangay" className="text-xs">Barangay</Label>
+                       <Input
+                         id="barangay"
+                         value={editedAddress.barangay}
+                         onChange={(e) => setEditedAddress(prev => ({ ...prev, barangay: e.target.value }))}
+                         placeholder="Barangay"
+                         className="h-8"
+                       />
+                     </div>
+                     <div className="space-y-1">
+                       <Label htmlFor="city" className="text-xs">City</Label>
+                       <Input
+                         id="city"
+                         value={editedAddress.city}
+                         onChange={(e) => setEditedAddress(prev => ({ ...prev, city: e.target.value }))}
+                         placeholder="City"
+                         className="h-8"
+                       />
+                     </div>
+                   </div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                     <div className="space-y-1">
+                       <Label htmlFor="province" className="text-xs">Province</Label>
+                       <Input
+                         id="province"
+                         value={editedAddress.province}
+                         onChange={(e) => setEditedAddress(prev => ({ ...prev, province: e.target.value }))}
+                         placeholder="Province"
+                         className="h-8"
+                       />
+                     </div>
+                     <div className="space-y-1">
+                       <Label htmlFor="zip_code" className="text-xs">ZIP Code</Label>
+                       <Input
+                         id="zip_code"
+                         value={editedAddress.zip_code}
+                         onChange={(e) => setEditedAddress(prev => ({ ...prev, zip_code: e.target.value }))}
+                         placeholder="ZIP Code"
+                         className="h-8"
+                       />
+                     </div>
+                   </div>
+                 </div>
                 <div className="flex justify-end space-x-2 pt-2">
                   <Button
                     variant="outline"

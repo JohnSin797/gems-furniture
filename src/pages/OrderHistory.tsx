@@ -141,8 +141,8 @@ const OrderHistory = () => {
                            </div>
                         </div>
                       </div>
-                     <div className="flex-1 flex justify-center mb-2 sm:mb-0 md:px-8 sm:px-4">
-                       <div className="grid grid-cols-3 w-full md:px-4 gap-4">
+                      <div className="flex-1 flex justify-center mb-2 sm:mb-0 md:px-8 sm:px-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 w-full md:px-4 gap-2 sm:gap-4">
                          <div>
                            <p className="text-sm text-muted-foreground">Items</p>
                            <p className="font-semibold">{order.order_items?.length || 0}</p>

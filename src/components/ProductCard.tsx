@@ -64,7 +64,7 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
 
         {/* Buy now button */}
         {userRole !== 'admin' && quantity > 0 && (
-          <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <div className="absolute bottom-4 left-4 right-4 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 md:transform md:translate-y-2 md:group-hover:translate-y-0">
             <Button
               onClick={handleBuyNow}
               className="w-full"

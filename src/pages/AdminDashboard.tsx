@@ -429,15 +429,19 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-charcoal mb-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4">
+        {/* Header */}
+        <div className="mb-6 md:mb-8 text-center sm:text-left">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-charcoal mb-1">
             Admin Dashboard
           </h1>
-          <p className="text-muted-foreground">Manage your furniture store</p>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Manage your furniture store
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
           {stats.map((stat, idx) => {
             const bgColors = [
               "bg-sage/10",
@@ -448,13 +452,13 @@ const AdminDashboard = () => {
             return (
               <Card key={idx} className={bgColors[idx]}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </CardTitle>
-                  <stat.icon className="h-4 w-4 text-sage" />
+                  <stat.icon className="h-4 w-4 text-sage shrink-0" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-charcoal">
+                  <div className="text-xl sm:text-2xl font-bold text-charcoal">
                     {stat.value}
                   </div>
                   <p className="text-xs text-sage font-medium">
@@ -466,78 +470,87 @@ const AdminDashboard = () => {
           })}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Orders + Products */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
           {/* Recent Orders */}
           <Card className="min-h-[400px]">
             <CardHeader>
-              <CardTitle className="text-charcoal">Recent Orders</CardTitle>
+              <CardTitle className="text-charcoal text-lg sm:text-xl">
+                Recent Orders
+              </CardTitle>
               <CardDescription>Latest customer orders</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[300px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Order ID</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentOrders.length === 0 ? (
+              <ScrollArea className="h-[250px] sm:h-[300px]">
+                <div className="overflow-x-auto">
+                  <Table className="min-w-full text-sm">
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center">
-                          No recent orders
-                        </TableCell>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
-                    ) : (
-                      recentOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">
-                            {order.order_number}
-                          </TableCell>
-                          <TableCell>{order.customer_name}</TableCell>
-                          <TableCell>${order.total_amount}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(order.status)}>
-                              {order.status}
-                            </Badge>
+                    </TableHeader>
+                    <TableBody>
+                      {recentOrders.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center">
+                            No recent orders
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                      ) : (
+                        recentOrders.map((order) => (
+                          <TableRow key={order.id}>
+                            <TableCell className="font-medium">
+                              {order.order_number}
+                            </TableCell>
+                            <TableCell>{order.customer_name}</TableCell>
+                            <TableCell>${order.total_amount}</TableCell>
+                            <TableCell>
+                              <Badge className={getStatusColor(order.status)}>
+                                {order.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </ScrollArea>
             </CardContent>
           </Card>
 
           {/* Products */}
           <Card className="min-h-[400px]">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <CardTitle className="text-charcoal">Products</CardTitle>
+                <CardTitle className="text-charcoal text-lg sm:text-xl">
+                  Products
+                </CardTitle>
                 <CardDescription>Manage your inventory</CardDescription>
               </div>
               <Button
-                className="bg-sage hover:bg-sage/90"
+                className="w-full sm:w-auto bg-sage hover:bg-sage/90"
                 onClick={handleAddProduct}
               >
                 <Plus className="h-4 w-4 mr-2" /> Add Product
               </Button>
             </CardHeader>
+
             <CardContent>
-              <ScrollArea className="h-[300px]">
-                <Table>
+              <ScrollArea className="h-[250px] sm:h-[300px]">
+                <Table className="w-full table-fixed text-sm">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="w-[40%]">Product</TableHead>
+                      <TableHead className="w-[20%]">Price</TableHead>
+                      <TableHead className="w-[20%]">Stock</TableHead>
+                      <TableHead className="w-[20%]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {loading ? (
                       <TableRow>
@@ -554,18 +567,20 @@ const AdminDashboard = () => {
                     ) : (
                       products.map((product) => (
                         <TableRow key={product.id}>
-                          <TableCell>
+                          <TableCell className="truncate">
                             <div>
                               <div className="font-medium">{product.name}</div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-xs sm:text-sm text-muted-foreground truncate">
                                 {product.category}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>${product.price}</TableCell>
-                          <TableCell>{product.inventory?.quantity ?? 0}</TableCell>
                           <TableCell>
-                            <div className="flex space-x-2">
+                            {product.inventory?.quantity ?? 0}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2 justify-center">
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -593,81 +608,89 @@ const AdminDashboard = () => {
         </div>
 
         {/* Featured Collections */}
-        <Card className="mt-8">
-          <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="mt-6 lg:mt-8">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="text-charcoal">
+              <CardTitle className="text-charcoal text-lg sm:text-xl">
                 Featured Collections
               </CardTitle>
               <CardDescription>
                 Manage products displayed on the homepage
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <Select onValueChange={handleAddToFeatured}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Add product..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableProducts
-                    .filter(
-                      (product) =>
-                        !featuredCollections.some(
-                          (fc) => fc.product_id === product.id
-                        )
-                    )
-                    .map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select onValueChange={handleAddToFeatured}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Add product..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableProducts
+                  .filter(
+                    (product) =>
+                      !featuredCollections.some(
+                        (fc) => fc.product_id === product.id
+                      )
+                  )
+                  .map((product) => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {featuredCollections.length === 0 ? (
+            <div className="overflow-x-auto">
+              <Table className="min-w-full text-sm">
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center">
-                      No featured products
-                    </TableCell>
+                    <TableHead className="min-w-[180px] sm:min-w-[200px]">
+                      Product
+                    </TableHead>
+                    <TableHead className="min-w-[100px] sm:min-w-[120px]">
+                      Category
+                    </TableHead>
+                    <TableHead className="min-w-[80px] sm:min-w-[100px]">
+                      Price
+                    </TableHead>
+                    <TableHead className="min-w-[80px] sm:min-w-[100px]">
+                      Actions
+                    </TableHead>
                   </TableRow>
-                ) : (
-                  featuredCollections.map((fc) => (
-                    <TableRow key={fc.id}>
-                      <TableCell>
-                        {fc.products?.name ?? "Unknown Product"}
-                      </TableCell>
-                      <TableCell>
-                        {fc.products?.category ?? "Unknown"}
-                      </TableCell>
-                      <TableCell>
-                        ${fc.products?.price ?? "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRemoveFromFeatured(fc.id)}
-                        >
-                          Remove
-                        </Button>
+                </TableHeader>
+                <TableBody>
+                  {featuredCollections.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center">
+                        No featured products
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    featuredCollections.map((fc) => (
+                      <TableRow key={fc.id}>
+                        <TableCell>
+                          {fc.products?.name ?? "Unknown Product"}
+                        </TableCell>
+                        <TableCell>
+                          {fc.products?.category ?? "Unknown"}
+                        </TableCell>
+                        <TableCell>
+                          ${fc.products?.price ?? "N/A"}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRemoveFromFeatured(fc.id)}
+                          >
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

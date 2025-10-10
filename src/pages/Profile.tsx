@@ -171,7 +171,7 @@ const Profile = () => {
           <p className="text-muted-foreground">Manage your account information</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Profile Information */}
           <div className="lg:col-span-2 space-y-8">
             <Card>

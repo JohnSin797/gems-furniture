@@ -139,16 +139,17 @@ const Archive = () => {
             <CardDescription>Products that have been archived but can be restored</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Archived Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[200px]">Product</TableHead>
+                    <TableHead className="min-w-[100px]">Price</TableHead>
+                    <TableHead className="min-w-[80px]">Stock</TableHead>
+                    <TableHead className="min-w-[120px]">Archived Date</TableHead>
+                    <TableHead className="min-w-[150px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
@@ -200,9 +201,10 @@ const Archive = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </CardContent>
+               </TableBody>
+               </Table>
+             </div>
+           </CardContent>
         </Card>
       </div>
     </AdminLayout>
