@@ -179,10 +179,65 @@ const AdminDashboard = () => {
         .select("id", { count: "exact" });
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
       const { data: todaysOrders } = await supabase
         .from("orders")
         .select("id", { count: "exact" })
-        .gte("created_at", today.toISOString());
+        .gte("created_at", today.toISOString())
+        .lt("created_at", tomorrow.toISOString());
+
+      // Calculate orders for same day last month
+      const lastMonthToday = new Date(today);
+      lastMonthToday.setMonth(lastMonthToday.getMonth() - 1);
+      const lastMonthTomorrow = new Date(lastMonthToday);
+      lastMonthTomorrow.setDate(lastMonthTomorrow.getDate() + 1);
+      const { data: lastMonthTodaysOrders } = await supabase
+        .from("orders")
+        .select("id", { count: "exact" })
+        .gte("created_at", lastMonthToday.toISOString())
+        .lt("created_at", lastMonthTomorrow.toISOString());
+
+      // Calculate revenue from confirmed and received orders for current month
+      const currentMonth = new Date();
+      currentMonth.setDate(1);
+      currentMonth.setHours(0, 0, 0, 0);
+      const { data: revenueOrders } = await supabase
+        .from("orders")
+        .select("total_amount")
+        .in("status", ["confirmed", "received"])
+        .gte("created_at", currentMonth.toISOString());
+
+      const totalRevenue = revenueOrders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+
+      // Calculate revenue from confirmed and received orders for last month
+      const lastMonth = new Date(currentMonth);
+      lastMonth.setMonth(lastMonth.getMonth() - 1);
+      const { data: lastMonthRevenueOrders } = await supabase
+        .from("orders")
+        .select("total_amount")
+        .in("status", ["confirmed", "received"])
+        .gte("created_at", lastMonth.toISOString())
+        .lt("created_at", currentMonth.toISOString());
+
+      const lastMonthRevenue = lastMonthRevenueOrders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+
+      // Calculate active users (users with orders in current month)
+      const { data: currentMonthUsers } = await supabase
+        .from("orders")
+        .select("user_id", { count: "exact" })
+        .gte("created_at", currentMonth.toISOString());
+
+      const activeUsersCount = new Set(currentMonthUsers?.map(order => order.user_id)).size;
+
+      // Calculate active users for last month
+      const { data: lastMonthUsers } = await supabase
+        .from("orders")
+        .select("user_id", { count: "exact" })
+        .gte("created_at", lastMonth.toISOString())
+        .lt("created_at", currentMonth.toISOString());
+
+      const lastMonthActiveUsersCount = new Set(lastMonthUsers?.map(order => order.user_id)).size;
 
       setStats((prev) =>
         prev.map((stat) => {
@@ -191,8 +246,41 @@ const AdminDashboard = () => {
               ...stat,
               value: productsCount?.length?.toString() || "0",
             };
-          if (stat.title === "Orders Today")
-            return { ...stat, value: todaysOrders?.length?.toString() || "0" };
+          if (stat.title === "Orders Today") {
+            const todaysCount = todaysOrders?.length || 0;
+            const lastMonthCount = lastMonthTodaysOrders?.length || 0;
+            const changePercent = lastMonthCount > 0
+              ? ((todaysCount - lastMonthCount) / lastMonthCount * 100).toFixed(1)
+              : todaysCount > 0 ? "+100.0" : "0.0";
+            const changeSign = todaysCount >= lastMonthCount ? "+" : "";
+            return {
+              ...stat,
+              value: todaysCount.toString(),
+              change: `${changeSign}${changePercent}%`
+            };
+          }
+          if (stat.title === "Active Users") {
+            const changePercent = lastMonthActiveUsersCount > 0
+              ? ((activeUsersCount - lastMonthActiveUsersCount) / lastMonthActiveUsersCount * 100).toFixed(1)
+              : activeUsersCount > 0 ? "+100.0" : "0.0";
+            const changeSign = activeUsersCount >= lastMonthActiveUsersCount ? "+" : "";
+            return {
+              ...stat,
+              value: activeUsersCount.toString(),
+              change: `${changeSign}${changePercent}%`
+            };
+          }
+          if (stat.title === "Revenue") {
+            const changePercent = lastMonthRevenue > 0
+              ? ((totalRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1)
+              : totalRevenue > 0 ? "+100.0" : "0.0";
+            const changeSign = totalRevenue >= lastMonthRevenue ? "+" : "";
+            return {
+              ...stat,
+              value: `$${totalRevenue.toFixed(2)}`,
+              change: `${changeSign}${changePercent}%`
+            };
+          }
           return stat;
         })
       );
