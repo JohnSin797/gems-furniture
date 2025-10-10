@@ -2,12 +2,12 @@ import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Archive as ArchiveIcon, RotateCcw, Trash2, Package } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 export interface ArchivedProduct {
   id: string;
@@ -28,6 +28,11 @@ const Archive = () => {
 
   const [products, setProducts] = useState<ArchivedProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    type: "restore" | "delete" | null;
+    productId: string | null;
+  }>({ open: false, type: null, productId: null });
 
   // Restrict access to admin
   useEffect(() => {
@@ -80,13 +85,18 @@ const Archive = () => {
   }, [toast]);
 
   // Handle restore product
-  const handleRestoreProduct = async (productId: string) => {
-    if (!confirm("Are you sure you want to restore this product? It will become active again.")) return;
+  const handleRestoreProduct = (productId: string) => {
+    setConfirmDialog({ open: true, type: "restore", productId });
+  };
+
+  // Confirm restore product
+  const confirmRestoreProduct = async () => {
+    if (!confirmDialog.productId) return;
     try {
       const { error } = await supabase
         .from("products")
         .update({ status: 'active' })
-        .eq("id", productId);
+        .eq("id", confirmDialog.productId);
 
       if (error) throw error;
       toast({ title: "Success", description: "Product restored successfully" });
@@ -98,10 +108,15 @@ const Archive = () => {
   };
 
   // Handle permanent delete
-  const handlePermanentDelete = async (productId: string) => {
-    if (!confirm("Are you sure you want to permanently delete this product? This action cannot be undone.")) return;
+  const handlePermanentDelete = (productId: string) => {
+    setConfirmDialog({ open: true, type: "delete", productId });
+  };
+
+  // Confirm permanent delete
+  const confirmPermanentDelete = async () => {
+    if (!confirmDialog.productId) return;
     try {
-      const { error } = await supabase.from("products").delete().eq("id", productId);
+      const { error } = await supabase.from("products").delete().eq("id", confirmDialog.productId);
       if (error) throw error;
       toast({ title: "Success", description: "Product permanently deleted" });
       fetchArchivedProducts();
@@ -206,6 +221,27 @@ const Archive = () => {
              </div>
            </CardContent>
         </Card>
+
+        <ConfirmationDialog
+          open={confirmDialog.open}
+          onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+          title={
+            confirmDialog.type === "restore"
+              ? "Restore Product"
+              : "Delete Product Permanently"
+          }
+          description={
+            confirmDialog.type === "restore"
+              ? "Are you sure you want to restore this product? It will become active again."
+              : "Are you sure you want to permanently delete this product? This action cannot be undone."
+          }
+          confirmText={confirmDialog.type === "restore" ? "Restore" : "Delete"}
+          cancelText="Cancel"
+          onConfirm={
+            confirmDialog.type === "restore" ? confirmRestoreProduct : confirmPermanentDelete
+          }
+          variant={confirmDialog.type === "delete" ? "destructive" : "default"}
+        />
       </div>
     </AdminLayout>
   );

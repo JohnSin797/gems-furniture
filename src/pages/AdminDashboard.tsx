@@ -37,6 +37,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ProductDialog, ProductStatus } from "@/components/ProductDialog";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { useToast } from "@/hooks/use-toast";
 
 export interface ProductWithInventory {
@@ -106,6 +107,8 @@ const AdminDashboard = () => {
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] =
     useState<ProductWithInventory | null>(null);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [productToArchive, setProductToArchive] = useState<string | null>(null);
   const [featuredCollections, setFeaturedCollections] = useState<
     FeaturedCollection[]
   >([]);
@@ -303,18 +306,18 @@ const AdminDashboard = () => {
   }, [toast]);
 
   // Handle product actions
-  const handleArchiveProduct = async (productId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to archive this product? It will be moved to the archive and can be restored later."
-      )
-    )
-      return;
+  const handleArchiveProduct = (productId: string) => {
+    setProductToArchive(productId);
+    setArchiveDialogOpen(true);
+  };
+
+  const confirmArchiveProduct = async () => {
+    if (!productToArchive) return;
     try {
       const { error } = await supabase
         .from("products")
         .update({ status: "inactive" })
-        .eq("id", productId);
+        .eq("id", productToArchive);
       if (error) throw error;
       toast({ title: "Success", description: "Product archived successfully" });
       fetchProducts();
@@ -326,6 +329,8 @@ const AdminDashboard = () => {
         description: "Failed to archive product",
         variant: "destructive",
       });
+    } finally {
+      setProductToArchive(null);
     }
   };
 
@@ -700,6 +705,17 @@ const AdminDashboard = () => {
         onOpenChange={setProductDialogOpen}
         onSave={handleProductSaved}
         product={editingProduct}
+      />
+
+      <ConfirmationDialog
+        open={archiveDialogOpen}
+        onOpenChange={setArchiveDialogOpen}
+        title="Archive Product"
+        description="Are you sure you want to archive this product? It will be moved to the archive and can be restored later."
+        confirmText="Archive"
+        cancelText="Cancel"
+        onConfirm={confirmArchiveProduct}
+        variant="destructive"
       />
     </AdminLayout>
   );
