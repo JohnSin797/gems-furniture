@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Calendar, Shield, MapPin } from "lucide-react";
+import { User, Mail, Calendar, MapPin } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -206,87 +206,80 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Account Created</Label>
-                    <div className="flex items-center space-x-2 p-3 bg-muted rounded-md">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Account Role</Label>
-                    <div className="flex items-center space-x-2 p-3 bg-muted rounded-md">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm capitalize">
-                        {userRole || 'User'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <Label>Account Created</Label>
+                     <div className="flex items-center space-x-2 p-3 bg-muted rounded-md">
+                       <Calendar className="h-4 w-4 text-muted-foreground" />
+                       <span className="text-sm">
+                         {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
               </CardContent>
             </Card>
 
-            {/* Address Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5" />
-                  <span>Address Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="street">Street Address</Label>
-                    <Input
-                      id="street"
-                      value={address.street}
-                      onChange={(e) => setAddress(prev => ({ ...prev, street: e.target.value }))}
-                      placeholder="Enter your street address"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="barangay">Barangay</Label>
-                    <Input
-                      id="barangay"
-                      value={address.barangay}
-                      onChange={(e) => setAddress(prev => ({ ...prev, barangay: e.target.value }))}
-                      placeholder="Enter your barangay"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City/Municipality</Label>
-                    <Input
-                      id="city"
-                      value={address.city}
-                      onChange={(e) => setAddress(prev => ({ ...prev, city: e.target.value }))}
-                      placeholder="Enter your city or municipality"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="province">Province</Label>
-                    <Input
-                      id="province"
-                      value={address.province}
-                      onChange={(e) => setAddress(prev => ({ ...prev, province: e.target.value }))}
-                      placeholder="Enter your province"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="zipCode">ZIP Code</Label>
-                    <Input
-                      id="zipCode"
-                      value={address.zipCode}
-                      onChange={(e) => setAddress(prev => ({ ...prev, zipCode: e.target.value }))}
-                      placeholder="Enter your ZIP code"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+             {/* Address Information */}
+             {userRole !== 'admin' && (
+               <Card>
+                 <CardHeader>
+                   <CardTitle className="flex items-center space-x-2">
+                     <MapPin className="h-5 w-5" />
+                     <span>Address Information</span>
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent className="space-y-6">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2 md:col-span-2">
+                       <Label htmlFor="street">Street Address</Label>
+                       <Input
+                         id="street"
+                         value={address.street}
+                         onChange={(e) => setAddress(prev => ({ ...prev, street: e.target.value }))}
+                         placeholder="Enter your street address"
+                       />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="barangay">Barangay</Label>
+                       <Input
+                         id="barangay"
+                         value={address.barangay}
+                         onChange={(e) => setAddress(prev => ({ ...prev, barangay: e.target.value }))}
+                         placeholder="Enter your barangay"
+                       />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="city">City/Municipality</Label>
+                       <Input
+                         id="city"
+                         value={address.city}
+                         onChange={(e) => setAddress(prev => ({ ...prev, city: e.target.value }))}
+                         placeholder="Enter your city or municipality"
+                       />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="province">Province</Label>
+                       <Input
+                         id="province"
+                         value={address.province}
+                         onChange={(e) => setAddress(prev => ({ ...prev, province: e.target.value }))}
+                         placeholder="Enter your province"
+                       />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="zipCode">ZIP Code</Label>
+                       <Input
+                         id="zipCode"
+                         value={address.zipCode}
+                         onChange={(e) => setAddress(prev => ({ ...prev, zipCode: e.target.value }))}
+                         placeholder="Enter your ZIP code"
+                       />
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
 
             {/* Update Button */}
             <div className="flex justify-end pt-4">
