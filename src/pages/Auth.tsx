@@ -33,6 +33,7 @@ const Auth = () => {
     password: "",
     confirmPassword: "",
   });
+  const [forgotPasswordData, setForgotPasswordData] = useState({ email: "" });
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -150,6 +151,39 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        forgotPasswordData.email,
+        {
+          redirectTo: `${window.location.origin}/reset-password`,
+        }
+      );
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Password reset email sent! Please check your inbox.",
+      });
+
+      setForgotPasswordData({ email: "" });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to send reset email";
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -171,9 +205,10 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="forgot">Forgot Password</TabsTrigger>
               </TabsList>
 
               {/* --- SIGN IN --- */}
@@ -208,11 +243,25 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="remember" />
-                    <Label htmlFor="remember" className="text-sm">
-                      Remember me
-                    </Label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="remember" />
+                      <Label htmlFor="remember" className="text-sm">
+                        Remember me
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 h-auto text-sm"
+                      onClick={() => {
+                        const tabs = document.querySelector('[role="tablist"]');
+                        const forgotTab = tabs?.querySelector('[value="forgot"]') as HTMLElement;
+                        forgotTab?.click();
+                      }}
+                    >
+                      Forgot password?
+                    </Button>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Signing in..." : "Sign In"}
@@ -303,6 +352,31 @@ const Auth = () => {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
+                </form>
+              </TabsContent>
+
+              {/* --- FORGOT PASSWORD --- */}
+              <TabsContent value="forgot">
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      placeholder="Enter your email address"
+                      value={forgotPasswordData.email}
+                      onChange={(e) =>
+                        setForgotPasswordData({ email: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Sending..." : "Send Reset Email"}
+                  </Button>
+                  <p className="text-sm text-muted-foreground text-center">
+                    We'll send you a link to reset your password.
+                  </p>
                 </form>
               </TabsContent>
             </Tabs>
