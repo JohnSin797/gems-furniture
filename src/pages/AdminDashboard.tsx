@@ -522,7 +522,8 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4">
+      {/* 🩵 Main Wrapper */}
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 overflow-x-hidden">
         {/* Header */}
         <div className="mb-6 md:mb-8 text-center sm:text-left">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-charcoal mb-1">
@@ -533,8 +534,8 @@ const AdminDashboard = () => {
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
           {stats.map((stat, idx) => {
             const bgColors = [
               "bg-sage/10",
@@ -543,21 +544,21 @@ const AdminDashboard = () => {
               "bg-green-50",
             ];
             return (
-              <Card key={idx} className={bgColors[idx]}>
+              <Card key={idx} className={`${bgColors[idx]} rounded-xl`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </CardTitle>
                   <stat.icon className="h-4 w-4 text-sage shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-xl sm:text-2xl font-bold text-charcoal">
-                    {stat.value}
-                  </div>
-                  <p className="text-xs text-sage font-medium">
-                    {stat.change} from last month
-                  </p>
-                </CardContent>
+                 <CardContent>
+                   <div className="text-xl sm:text-2xl font-bold text-charcoal mb-1">
+                     {stat.value}
+                   </div>
+                   <p className="text-xs sm:text-sm text-sage font-medium">
+                     {stat.change} from last month
+                   </p>
+                 </CardContent>
               </Card>
             );
           })}
@@ -575,39 +576,42 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[250px] sm:h-[300px]">
-                <div className="overflow-x-auto">
-                  <Table className="min-w-full text-sm">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
+                {/* 🧭 Make table scrollable horizontally */}
+                <div className="w-full overflow-x-auto">
+                  <Table className="min-w-full text-xs sm:text-sm">
+                     <TableHeader>
+                       <TableRow>
+                         <TableHead className="hidden sm:table-cell">Order ID</TableHead>
+                         <TableHead>Customer</TableHead>
+                         <TableHead>Amount</TableHead>
+                         <TableHead>Status</TableHead>
+                       </TableRow>
+                     </TableHeader>
                     <TableBody>
-                      {recentOrders.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center">
-                            No recent orders
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        recentOrders.map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell className="font-medium">
-                              {order.order_number}
-                            </TableCell>
-                            <TableCell>{order.customer_name}</TableCell>
-                            <TableCell>${order.total_amount}</TableCell>
-                            <TableCell>
-                              <Badge className={getStatusColor(order.status)}>
-                                {order.status}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
+                       {recentOrders.length === 0 ? (
+                         <TableRow>
+                           <TableCell colSpan={3} className="text-center py-4 sm:col-span-4">
+                             No recent orders
+                           </TableCell>
+                         </TableRow>
+                       ) : (
+                         recentOrders.map((order) => (
+                           <TableRow key={order.id}>
+                             <TableCell className="font-medium truncate hidden sm:table-cell">
+                               {order.order_number}
+                             </TableCell>
+                             <TableCell className="truncate">
+                               {order.customer_name}
+                             </TableCell>
+                             <TableCell>${order.total_amount}</TableCell>
+                             <TableCell>
+                               <Badge className={getStatusColor(order.status)}>
+                                 {order.status}
+                               </Badge>
+                             </TableCell>
+                           </TableRow>
+                         ))
+                       )}
                     </TableBody>
                   </Table>
                 </div>
@@ -634,67 +638,74 @@ const AdminDashboard = () => {
 
             <CardContent>
               <ScrollArea className="h-[250px] sm:h-[300px]">
-                <Table className="w-full table-fixed text-sm">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[40%]">Product</TableHead>
-                      <TableHead className="w-[20%]">Price</TableHead>
-                      <TableHead className="w-[20%]">Stock</TableHead>
-                      <TableHead className="w-[20%]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-
-                  <TableBody>
-                    {loading ? (
+                <div className="w-full overflow-x-auto">
+                  <Table className="min-w-full text-xs sm:text-sm">
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center">
-                          Loading products...
-                        </TableCell>
+                        <TableHead className="w-[40%]">Product</TableHead>
+                        <TableHead className="w-[20%]">Price</TableHead>
+                        <TableHead className="w-[20%]">Stock</TableHead>
+                        <TableHead className="w-[20%] text-center">
+                          Actions
+                        </TableHead>
                       </TableRow>
-                    ) : products.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center">
-                          No products found
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      products.map((product) => (
-                        <TableRow key={product.id}>
-                          <TableCell className="truncate">
-                            <div>
-                              <div className="font-medium">{product.name}</div>
-                              <div className="text-xs sm:text-sm text-muted-foreground truncate">
-                                {product.category}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>${product.price}</TableCell>
-                          <TableCell>
-                            {product.inventory?.quantity ?? 0}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2 justify-center">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditProduct(product)}
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleArchiveProduct(product.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
+                    </TableHeader>
+                    <TableBody>
+                      {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-4">
+                            Loading products...
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                      ) : products.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-4">
+                            No products found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        products.map((product) => (
+                          <TableRow key={product.id}>
+                            <TableCell className="truncate">
+                              <div>
+                                <div className="font-medium">{product.name}</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground truncate">
+                                  {product.category}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>${product.price}</TableCell>
+                            <TableCell>
+                              {product.inventory?.quantity ?? 0}
+                            </TableCell>
+                             <TableCell>
+                               <div className="flex justify-center space-x-1 sm:space-x-2">
+                                 <Button
+                                   variant="outline"
+                                   size="sm"
+                                   onClick={() => handleEditProduct(product)}
+                                   className="h-9 w-9 sm:h-8 sm:w-8 p-0"
+                                 >
+                                   <Edit className="h-3 w-3" />
+                                 </Button>
+                                 <Button
+                                   variant="outline"
+                                   size="sm"
+                                   onClick={() =>
+                                     handleArchiveProduct(product.id)
+                                   }
+                                   className="h-9 w-9 sm:h-8 sm:w-8 p-0"
+                                 >
+                                   <Trash2 className="h-3 w-3" />
+                                 </Button>
+                               </div>
+                             </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </ScrollArea>
             </CardContent>
           </Card>
@@ -731,56 +742,59 @@ const AdminDashboard = () => {
               </SelectContent>
             </Select>
           </CardHeader>
+
           <CardContent>
-            <div className="overflow-x-auto">
-              <Table className="min-w-full text-sm">
+            <div className="w-full overflow-x-auto">
+              <Table className="min-w-full text-xs sm:text-sm">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[180px] sm:min-w-[200px]">
-                      Product
-                    </TableHead>
-                    <TableHead className="min-w-[100px] sm:min-w-[120px]">
-                      Category
-                    </TableHead>
-                    <TableHead className="min-w-[80px] sm:min-w-[100px]">
-                      Price
-                    </TableHead>
-                    <TableHead className="min-w-[80px] sm:min-w-[100px]">
-                      Actions
-                    </TableHead>
+                     <TableHead className="min-w-[120px] sm:min-w-[200px]">
+                       Product
+                     </TableHead>
+                     <TableHead className="min-w-[80px] sm:min-w-[120px] hidden sm:table-cell">
+                       Category
+                     </TableHead>
+                     <TableHead className="min-w-[60px] sm:min-w-[100px]">
+                       Price
+                     </TableHead>
+                     <TableHead className="min-w-[50px] sm:min-w-[100px] text-center">
+                       Actions
+                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {featuredCollections.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center">
-                        No featured products
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    featuredCollections.map((fc) => (
-                      <TableRow key={fc.id}>
-                        <TableCell>
-                          {fc.products?.name ?? "Unknown Product"}
-                        </TableCell>
-                        <TableCell>
-                          {fc.products?.category ?? "Unknown"}
-                        </TableCell>
-                        <TableCell>
-                          ${fc.products?.price ?? "N/A"}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleRemoveFromFeatured(fc.id)}
-                          >
-                            Remove
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                   {featuredCollections.length === 0 ? (
+                     <TableRow>
+                       <TableCell colSpan={3} className="text-center py-4 sm:col-span-4">
+                         No featured products
+                       </TableCell>
+                     </TableRow>
+                   ) : (
+                     featuredCollections.map((fc) => (
+                       <TableRow key={fc.id}>
+                         <TableCell className="truncate">
+                           <div>
+                             <div className="font-medium">{fc.products?.name ?? "Unknown Product"}</div>
+                             <div className="text-xs text-muted-foreground sm:hidden">
+                               {fc.products?.category ?? "Unknown"}
+                             </div>
+                           </div>
+                         </TableCell>
+                         <TableCell className="hidden sm:table-cell">{fc.products?.category ?? "Unknown"}</TableCell>
+                         <TableCell>${fc.products?.price ?? "N/A"}</TableCell>
+                         <TableCell className="text-center">
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => handleRemoveFromFeatured(fc.id)}
+                             className="w-11 h-11 sm:w-8 sm:h-8 p-0"
+                           >
+                             <Trash2 className="h-3 w-3" />
+                           </Button>
+                         </TableCell>
+                       </TableRow>
+                     ))
+                   )}
                 </TableBody>
               </Table>
             </div>
@@ -788,6 +802,7 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
+      {/* Dialogs */}
       <ProductDialog
         open={productDialogOpen}
         onOpenChange={setProductDialogOpen}
