@@ -130,14 +130,14 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
                          </div>
                          <div className="flex-1 space-y-1">
                            <div className="flex items-center space-x-2">
-                             <h4
-                               className={`text-sm font-medium truncate ${
-                                 !notification.read ? "font-semibold" : ""
-                               }`}
-                               title={notification.title}
-                             >
-                               {notification.title}
-                             </h4>
+                              <h4
+                                className={`text-sm font-medium whitespace-normal break-words ${
+                                  !notification.read ? "font-semibold" : ""
+                                }`}
+                                title={notification.title}
+                              >
+                                {notification.title}
+                              </h4>
                              <Badge
                                className={`text-xs ${getTypeColor(notification.type)}`}
                                variant="outline"
@@ -145,12 +145,12 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
                                {notification.type}
                              </Badge>
                            </div>
-                           <p
-                             className="text-sm text-muted-foreground truncate"
-                             title={notification.message}
-                           >
-                             {notification.message}
-                           </p>
+                            <p
+                              className="text-sm text-muted-foreground whitespace-normal break-words"
+                              title={notification.message}
+                            >
+                              {notification.message}
+                            </p>
                            <p className="text-xs text-muted-foreground">
                              {format(new Date(notification.created_at), "MMM dd, yyyy HH:mm")}
                            </p>
