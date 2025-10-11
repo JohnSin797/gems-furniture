@@ -1,73 +1,89 @@
-# Welcome to your Lovable project
+# Gems Furniture
 
-## Project info
+A modern e-commerce platform for premium furniture that transforms houses into homes. Built with React, TypeScript, and Supabase.
 
-**URL**: https://lovable.dev/projects/d8858968-6676-4057-a203-a8a718bce012
+## Features
 
-## How can I edit this code?
+- **User Authentication**: Secure sign-up, sign-in, and profile management
+- **Product Catalog**: Browse and search through curated furniture collections
+- **Featured Products**: Highlighted items on the homepage
+- **Shopping Cart**: Add items, manage quantities, and proceed to checkout
+- **Order Management**: Track orders and view purchase history
+- **Admin Dashboard**: Manage products, orders, and user data
+- **Responsive Design**: Optimized for desktop and mobile devices
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18, TypeScript, Vite
+- **UI Framework**: Shadcn/ui components with Tailwind CSS
+- **Backend**: Supabase (Database, Authentication, Storage)
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router DOM
+- **Form Handling**: React Hook Form with Zod validation
+- **Icons**: Lucide React
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d8858968-6676-4057-a203-a8a718bce012) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (v18 or higher)
+- npm or yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd gems-furniture
+   ```
 
-Follow these steps:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Set up environment variables**
+   - Copy `.env.example` to `.env` (if exists) or configure Supabase settings
+   - Ensure Supabase project is set up with required tables and policies
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+5. **Open your browser**
+   - Navigate to `http://localhost:5173`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## Available Scripts
+
+- `npm run dev` - Start the development server
+- `npm run build` - Build the project for production
+- `npm run build:dev` - Build in development mode
+- `npm run lint` - Run ESLint for code quality checks
+- `npm run preview` - Preview the production build locally
+
+## Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # Shadcn/ui components
+│   └── ...             # Custom components
+├── pages/              # Route components
+├── hooks/              # Custom React hooks
+├── integrations/       # External service integrations
+│   └── supabase/       # Supabase client and types
+└── lib/                # Utility functions
 ```
 
-**Edit a file directly in GitHub**
+## Contributing
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-**Use GitHub Codespaces**
+## License
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/d8858968-6676-4057-a203-a8a718bce012) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is private and proprietary.
