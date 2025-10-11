@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 
 interface OrderItem {
@@ -80,6 +80,7 @@ const Orders = () => {
 
   const fetchOrderHistory = useCallback(async () => {
     try {
+      const thirtyDaysAgo = subDays(new Date(), 30);
       let query = supabase
         .from('orders')
         .select(`
@@ -87,6 +88,7 @@ const Orders = () => {
           order_items (*)
         `)
         .in('status', ['received', 'cancelled'])
+        .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
       // Only filter by user_id if not admin
@@ -107,7 +109,7 @@ const Orders = () => {
       console.error('Error fetching order history:', error);
 
       // show toast only if it's not the "no rows" case
-      if ((error as any).code !== 'PGRST116') {
+      if ((error as { code?: string }).code !== 'PGRST116') {
         toast({
           title: "Error",
           description: "Failed to load order history. Please try again.",
