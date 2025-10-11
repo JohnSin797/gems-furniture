@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface ProfileData {
   id: string;
@@ -42,6 +43,7 @@ const Profile = () => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const { user, userRole } = useAuth();
   const { toast } = useToast();
+  const { createNotification } = useNotifications();
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -196,6 +198,16 @@ const Profile = () => {
         title: "Password changed",
         description: "Your password has been updated successfully.",
       });
+
+      // Create notification for password change
+      if (user?.id) {
+        await createNotification(
+          user.id,
+          "Password Changed",
+          "Your password has been successfully updated.",
+          "success"
+        );
+      }
     } catch (error) {
       console.error('Error changing password:', error);
       toast({

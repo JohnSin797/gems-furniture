@@ -130,7 +130,7 @@ export const useNotifications = () => {
 
       // If this notification is for the current user, update the local state
       if (userId === user?.id) {
-        setNotifications(prev => [data, ...prev]);
+        setNotifications(prev => [data as Notification, ...prev]);
         setUnreadCount(prev => prev + 1);
       }
 
@@ -145,6 +145,40 @@ export const useNotifications = () => {
       return null;
     }
   }, [user, toast]);
+
+  // Delete a notification
+  const deleteNotification = useCallback(async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId);
+
+      if (error) throw error;
+
+      // Update local state
+      setNotifications(prev => {
+        const notification = prev.find(n => n.id === notificationId);
+        const newNotifications = prev.filter(n => n.id !== notificationId);
+        if (notification && !notification.read) {
+          setUnreadCount(count => Math.max(0, count - 1));
+        }
+        return newNotifications;
+      });
+
+      toast({
+        title: "Success",
+        description: "Notification deleted.",
+      });
+    } catch (err) {
+      console.error("Error deleting notification:", err);
+      toast({
+        title: "Error",
+        description: "Failed to delete notification.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   // Fetch notifications on mount and when user changes
   useEffect(() => {
@@ -164,5 +198,6 @@ export const useNotifications = () => {
     markAsRead,
     markAllAsRead,
     createNotification,
+    deleteNotification,
   };
 };

@@ -26,7 +26,7 @@ interface NotificationsProps {
 }
 
 const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
-  const { notifications, loading, markAsRead, markAllAsRead, unreadCount } = useNotifications();
+  const { notifications, loading, markAsRead, markAllAsRead, unreadCount, deleteNotification } = useNotifications();
 
   // Fetch notifications when panel opens
   useEffect(() => {
@@ -51,8 +51,8 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full max-w-md flex flex-col">
-        <SheetHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <SheetContent side="right" className="w-full max-w-sm flex flex-col">
+         <SheetHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <SheetTitle className="flex items-center space-x-2">
             <Bell className="h-5 w-5" />
             <span>Notifications</span>
@@ -80,13 +80,13 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             {loading ? (
-              <div className="p-4 space-y-2">
+               <div className="p-3 space-y-2">
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="h-12 bg-muted/30 animate-pulse rounded" />
                 ))}
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">
+               <div className="p-3 text-center text-muted-foreground">
                 No notifications yet.
               </div>
             ) : (
@@ -94,54 +94,68 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
                 {notifications.map((notification, index) => (
                   <div key={notification.id}>
                     <div
-                      className={`p-4 hover:bg-muted/50 cursor-pointer transition-colors ${
-                        !notification.read ? "bg-blue-50/50" : ""
-                      }`}
+                       className={`p-3 hover:bg-muted/50 cursor-pointer transition-colors ${
+                         !notification.read ? "bg-blue-50/50" : ""
+                       }`}
                       onClick={() => !notification.read && markAsRead(notification.id)}
                     >
-                      <div className="flex items-start justify-between space-x-2">
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <h4
-                              className={`text-sm font-medium truncate ${
-                                !notification.read ? "font-semibold" : ""
-                              }`}
-                              title={notification.title}
-                            >
-                              {notification.title}
-                            </h4>
-                            <Badge
-                              className={`text-xs ${getTypeColor(notification.type)}`}
-                              variant="outline"
-                            >
-                              {notification.type}
-                            </Badge>
-                          </div>
-                          <p
-                            className="text-sm text-muted-foreground truncate"
-                            title={notification.message}
-                          >
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(notification.created_at), "MMM dd, yyyy HH:mm")}
-                          </p>
+                       <div className="flex items-start space-x-2">
+                         <div className="flex items-center space-x-1">
+                           {!notification.read && (
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 markAsRead(notification.id);
+                               }}
+                               className="p-1 h-auto"
+                               aria-label="Mark notification as read"
+                             >
+                               <Check className="h-3 w-3" />
+                             </Button>
+                           )}
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               deleteNotification(notification.id);
+                             }}
+                             className="p-1 h-auto text-muted-foreground hover:text-destructive"
+                             aria-label="Delete notification"
+                           >
+                             <X className="h-3 w-3" />
+                           </Button>
+                         </div>
+                         <div className="flex-1 space-y-1">
+                           <div className="flex items-center space-x-2">
+                             <h4
+                               className={`text-sm font-medium truncate ${
+                                 !notification.read ? "font-semibold" : ""
+                               }`}
+                               title={notification.title}
+                             >
+                               {notification.title}
+                             </h4>
+                             <Badge
+                               className={`text-xs ${getTypeColor(notification.type)}`}
+                               variant="outline"
+                             >
+                               {notification.type}
+                             </Badge>
+                           </div>
+                           <p
+                             className="text-sm text-muted-foreground truncate"
+                             title={notification.message}
+                           >
+                             {notification.message}
+                           </p>
+                           <p className="text-xs text-muted-foreground">
+                             {format(new Date(notification.created_at), "MMM dd, yyyy HH:mm")}
+                           </p>
+                         </div>
                         </div>
-                        {!notification.read && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsRead(notification.id);
-                            }}
-                            className="p-1 h-auto"
-                            aria-label="Mark notification as read"
-                          >
-                            <Check className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
                     </div>
                     {index < notifications.length - 1 && <Separator />}
                   </div>
