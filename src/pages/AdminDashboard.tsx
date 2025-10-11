@@ -628,10 +628,10 @@ const AdminDashboard = () => {
                 </CardTitle>
                 <CardDescription>Manage your inventory</CardDescription>
               </div>
-              <Button
-                className="w-full sm:w-auto bg-sage hover:bg-sage/90"
-                onClick={handleAddProduct}
-              >
+               <Button
+                 className="w-full sm:w-auto bg-sage-light hover:bg-sage-light/90 text-charcoal"
+                 onClick={handleAddProduct}
+               >
                 <Plus className="h-4 w-4 mr-2" /> Add Product
               </Button>
             </CardHeader>
