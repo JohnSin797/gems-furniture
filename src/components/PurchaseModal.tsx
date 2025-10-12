@@ -196,10 +196,35 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
       // Create purchase notification
       await createNotification(
         user.id,
-        "Purchase Confirmed",
+        "New Pending Order",
         `Your order ${order.order_number} for ${quantity} × ${product.name} has been placed successfully.`,
-        "success"
+        "info"
       );
+
+      // Notify admins about the new order
+      const { data: adminRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+
+      const admins = adminRoles?.map(role => ({ id: role.user_id })) || [];
+
+      if (admins && admins.length > 0) {
+        const { data: userProfile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user?.id)
+          .single();
+
+        const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}`.trim() : 'Unknown User';
+        const adminNotifications = admins.map(admin => ({
+          user_id: admin.id,
+          title: "New Pending Order",
+          message: `New order ${order.order_number} placed by ${userName}`,
+          type: "info" as const
+        }));
+        await supabase.from('notifications').insert(adminNotifications);
+      }
 
       onClose();
     } catch (error) {

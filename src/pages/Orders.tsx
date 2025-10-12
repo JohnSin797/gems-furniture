@@ -50,13 +50,14 @@ const Orders = () => {
 
   const fetchActiveOrders = useCallback(async () => {
     try {
+      const activeStatuses = userRole === 'admin' ? ['pending', 'confirmed'] as const : ['pending', 'confirmed', 'to_deliver'] as const;
       let query = supabase
         .from('orders')
         .select(`
           *,
           order_items (*)
         `)
-        .in('status', ['pending', 'confirmed', 'to_deliver'])
+        .in('status', activeStatuses)
         .order('created_at', { ascending: false });
 
       // Only filter by user_id if not admin
@@ -81,13 +82,14 @@ const Orders = () => {
   const fetchOrderHistory = useCallback(async () => {
     try {
       const thirtyDaysAgo = subDays(new Date(), 30);
+      const historyStatuses = userRole === 'admin' ? ['to_deliver', 'received', 'cancelled'] as const : ['received', 'cancelled'] as const;
       let query = supabase
         .from('orders')
         .select(`
           *,
           order_items (*)
         `)
-        .in('status', ['received', 'cancelled'])
+        .in('status', historyStatuses)
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
@@ -134,8 +136,8 @@ const Orders = () => {
 
       if (error) throw error;
 
-      // Update local state - remove from active orders if status changes to received/cancelled
-      if (newStatus === 'received' || newStatus === 'cancelled') {
+      // Update local state - remove from active orders if status changes to received/cancelled or to_deliver for admin
+      if (newStatus === 'received' || newStatus === 'cancelled' || (userRole === 'admin' && newStatus === 'to_deliver')) {
         setActiveOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
         // Add to order history
         const order = activeOrders.find(o => o.id === orderId);
@@ -182,19 +184,57 @@ const Orders = () => {
             "success"
           );
         }
-      } else if (newStatus === 'cancelled') {
-        const order = activeOrders.find(o => o.id === orderId);
-        if (order) {
-          await createNotification(
-            order.user_id,
-            "Order Cancelled",
-            `Your order ${order.order_number} has been cancelled.`,
-            "error"
-          );
-        }
-      }
+       } else if (newStatus === 'cancelled') {
+         const order = activeOrders.find(o => o.id === orderId);
+         if (order) {
+           await createNotification(
+             order.user_id,
+             "Order Cancelled",
+             `Your order ${order.order_number} has been cancelled.`,
+             "error"
+           );
+         }
+       }
 
-      toast({
+        // Notify admins about the status change
+        const { data: adminRoles } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'admin');
+
+        const admins = adminRoles?.map(role => ({ id: role.user_id })) || [];
+
+       if (admins && admins.length > 0) {
+        //  const { data: userProfile } = await supabase
+        //    .from('profiles')
+        //    .select('first_name, last_name')
+        //    .eq('id', user?.id)
+        //    .single();
+        const { data: userProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user?.id)
+          .maybeSingle();
+
+        if (profileError) {
+          console.warn('Profile fetch error:', profileError);
+        }
+
+         const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}`.trim() : 'Unknown User';
+         const order = activeOrders.find(o => o.id === orderId);
+
+        //  if (order) {
+        //    const adminNotifications = admins.map(admin => ({
+        //      user_id: admin.id,
+        //      title: "Order Status Updated",
+        //      message: `Order ${order.order_number} status changed to ${newStatus} by ${userName}`,
+        //      type: "info" as const
+        //    }));
+        //    await supabase.from('notifications').insert(adminNotifications);
+        //  }
+       }
+
+       toast({
         title: "Status Updated",
         description: `Order status changed to ${newStatus}`,
       });
@@ -206,7 +246,8 @@ const Orders = () => {
         variant: "destructive",
       });
     }
-  }, [toast, activeOrders, createNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toast, activeOrders, createNotification, userRole]);
 
   const toggleOrderDetails = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -257,12 +298,12 @@ const Orders = () => {
                 <h3 className="text-xl font-semibold text-foreground mb-2">
                   {userRole === 'admin' ? 'No active orders' : 'No active orders yet'}
                 </h3>
-                  <p className="text-muted-foreground mb-6">
-                    {userRole === 'admin'
-                      ? 'There are no pending, confirmed, or to deliver orders at the moment.'
-                      : 'Your active orders will appear here.'
-                    }
-                  </p>
+                   <p className="text-muted-foreground mb-6">
+                     {userRole === 'admin'
+                       ? 'There are no pending or confirmed orders at the moment.'
+                       : 'Your active orders will appear here.'
+                     }
+                   </p>
                 {userRole !== 'admin' && (
                   <Button asChild>
                     <a href="/products">Browse Products</a>
@@ -395,12 +436,12 @@ const Orders = () => {
                  <h3 className="text-xl font-semibold text-foreground mb-2">
                    {userRole === 'admin' ? 'No order history' : 'No order history yet'}
                  </h3>
-                 <p className="text-muted-foreground mb-6">
-                   {userRole === 'admin'
-                     ? 'Completed and cancelled orders will appear here.'
-                     : 'Your completed and cancelled orders will appear here.'
-                   }
-                 </p>
+                  <p className="text-muted-foreground mb-6">
+                    {userRole === 'admin'
+                      ? 'To deliver, received, and cancelled orders will appear here.'
+                      : 'Your completed and cancelled orders will appear here.'
+                    }
+                  </p>
                  {userRole !== 'admin' && (
                    <Button asChild>
                      <a href="/products">Browse Products</a>
@@ -424,11 +465,12 @@ const Orders = () => {
                              </p>
                              <div className="flex items-center space-x-2 mt-1">
                                <span className="text-sm text-muted-foreground">Status:</span>
-                               <Badge className={
-                                 order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
-                                 order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
-                                 'bg-gray-100 text-gray-800 border-gray-200'
-                               }>
+                                <Badge className={
+                                  order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
+                                  order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
+                                  order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                  'bg-gray-100 text-gray-800 border-gray-200'
+                                }>
                                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                </Badge>
                              </div>
