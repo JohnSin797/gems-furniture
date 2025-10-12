@@ -56,7 +56,7 @@ const Orders = () => {
           *,
           order_items (*)
         `)
-        .in('status', ['pending', 'confirmed'])
+        .in('status', ['pending', 'confirmed', 'to_deliver'])
         .order('created_at', { ascending: false });
 
       // Only filter by user_id if not admin
@@ -152,17 +152,27 @@ const Orders = () => {
       }
 
       // Create notification for the user based on status change
-      if (newStatus === 'confirmed') {
-        const order = activeOrders.find(o => o.id === orderId);
-        if (order) {
-          await createNotification(
-            order.user_id,
-            "Order Confirmed",
-            `Your order ${order.order_number} has been confirmed.`,
-            "success"
-          );
-        }
-      } else if (newStatus === 'received') {
+       if (newStatus === 'confirmed') {
+         const order = activeOrders.find(o => o.id === orderId);
+         if (order) {
+           await createNotification(
+             order.user_id,
+             "Order Confirmed",
+             `Your order ${order.order_number} has been confirmed.`,
+             "success"
+           );
+         }
+       } else if (newStatus === 'to_deliver') {
+         const order = activeOrders.find(o => o.id === orderId);
+         if (order) {
+           await createNotification(
+             order.user_id,
+             "Order Ready for Delivery",
+             `Your order ${order.order_number} is ready for delivery.`,
+             "info"
+           );
+         }
+       } else if (newStatus === 'received') {
         const order = activeOrders.find(o => o.id === orderId);
         if (order) {
           await createNotification(
@@ -247,12 +257,12 @@ const Orders = () => {
                 <h3 className="text-xl font-semibold text-foreground mb-2">
                   {userRole === 'admin' ? 'No active orders' : 'No active orders yet'}
                 </h3>
-                <p className="text-muted-foreground mb-6">
-                  {userRole === 'admin'
-                    ? 'There are no pending or confirmed orders at the moment.'
-                    : 'Your active orders will appear here.'
-                  }
-                </p>
+                  <p className="text-muted-foreground mb-6">
+                    {userRole === 'admin'
+                      ? 'There are no pending, confirmed, or to deliver orders at the moment.'
+                      : 'Your active orders will appear here.'
+                    }
+                  </p>
                 {userRole !== 'admin' && (
                   <Button asChild>
                     <a href="/products">Browse Products</a>
@@ -276,32 +286,40 @@ const Orders = () => {
                           </p>
                             <div className="flex items-center space-x-2 mt-1">
                               <span className="text-sm text-muted-foreground">Status:</span>
-                               <Badge className={
-                                 order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                 order.status === 'confirmed' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                                 order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
-                                 order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
-                                 'bg-gray-100 text-gray-800 border-gray-200'
-                               }>
+                                <Badge className={
+                                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                  order.status === 'confirmed' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                                  order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                  order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
+                                  order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
+                                  'bg-gray-100 text-gray-800 border-gray-200'
+                                }>
                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                               </Badge>
-                              {userRole === 'admin' && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => updateOrderStatus(order.id, "confirmed")}
-                                  disabled={order.status === 'confirmed'}
-                                >
-                                  Confirm
-                                </Button>
-                              )}
-                              {userRole !== 'admin' && order.status === 'confirmed' && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => updateOrderStatus(order.id, "received")}
-                                >
-                                  Receive
-                                </Button>
-                              )}
+                               {userRole === 'admin' && order.status === 'pending' && (
+                                 <Button
+                                   size="sm"
+                                   onClick={() => updateOrderStatus(order.id, "confirmed")}
+                                 >
+                                   Confirm
+                                 </Button>
+                               )}
+                               {userRole === 'admin' && order.status === 'confirmed' && (
+                                 <Button
+                                   size="sm"
+                                   onClick={() => updateOrderStatus(order.id, "to_deliver")}
+                                 >
+                                   To Deliver
+                                 </Button>
+                               )}
+                                {userRole !== 'admin' && order.status === 'to_deliver' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => updateOrderStatus(order.id, "received")}
+                                  >
+                                    Receive
+                                  </Button>
+                                )}
                            </div>
                         </div>
                       </div>
