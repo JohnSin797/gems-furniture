@@ -217,13 +217,16 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
           .single();
 
         const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}`.trim() : 'Unknown User';
-        const adminNotifications = admins.map(admin => ({
-          user_id: admin.id,
-          title: "New Pending Order",
-          message: `New order ${order.order_number} placed by ${userName}`,
-          type: "info" as const
-        }));
-        await supabase.from('notifications').insert(adminNotifications);
+
+        // Create notification for each admin
+        for (const admin of admins) {
+          await createNotification(
+            admin.id,
+            "New Pending Order",
+            `New order ${order.order_number} placed by ${userName}`,
+            "info"
+          );
+        }
       }
 
       onClose();

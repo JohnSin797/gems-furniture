@@ -1,12 +1,12 @@
- import { useEffect, memo } from "react";
- import { Bell, Check, X } from "lucide-react";
- import { Button } from "@/components/ui/button";
- import { Badge } from "@/components/ui/badge";
- import { ScrollArea } from "@/components/ui/scroll-area";
- import { Separator } from "@/components/ui/separator";
- import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
- import { useNotifications } from "@/hooks/useNotifications";
- import { format } from "date-fns";
+import { useEffect, memo } from "react";
+import { Bell, Check, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useNotifications } from "@/hooks/useNotifications";
+import { format } from "date-fns";
 
 type NotificationType = "success" | "warning" | "error" | "info";
 
@@ -26,12 +26,22 @@ interface NotificationsProps {
 }
 
 const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
-  const { notifications, loading, markAsRead, markAllAsRead, unreadCount, deleteNotification } = useNotifications();
+  const {
+    notifications,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    unreadCount,
+    deleteNotification,
+    fetchNotifications,
+  } = useNotifications();
 
-  // Fetch notifications when panel opens
+  // ✅ Fetch notifications when panel opens
   useEffect(() => {
-    // The hook will handle fetching when user changes, but we can trigger a refresh here if needed
-  }, [isOpen]);
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen, fetchNotifications]);
 
   // Map notification type to badge color
   const getTypeColor = (type: NotificationType): string => {
@@ -47,12 +57,10 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
     }
   };
 
-
-
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="right" className="w-full max-w-sm flex flex-col">
-         <SheetHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+        <SheetHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <SheetTitle className="flex items-center space-x-2">
             <Bell className="h-5 w-5" />
             <span>Notifications</span>
@@ -80,13 +88,13 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             {loading ? (
-               <div className="p-3 space-y-2">
+              <div className="p-3 space-y-2">
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="h-12 bg-muted/30 animate-pulse rounded" />
                 ))}
               </div>
             ) : notifications.length === 0 ? (
-               <div className="p-3 text-center text-muted-foreground">
+              <div className="p-3 text-center text-muted-foreground">
                 No notifications yet.
               </div>
             ) : (
@@ -94,68 +102,71 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
                 {notifications.map((notification, index) => (
                   <div key={notification.id}>
                     <div
-                       className={`p-3 hover:bg-muted/50 cursor-pointer transition-colors ${
-                         !notification.read ? "bg-blue-50/50" : ""
-                       }`}
+                      className={`p-3 hover:bg-muted/50 cursor-pointer transition-colors ${
+                        !notification.read ? "bg-blue-50/50" : ""
+                      }`}
                       onClick={() => !notification.read && markAsRead(notification.id)}
                     >
-                       <div className="flex items-start space-x-2">
-                         <div className="flex items-center space-x-1">
-                           {!notification.read && (
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 markAsRead(notification.id);
-                               }}
-                               className="p-1 h-auto"
-                               aria-label="Mark notification as read"
-                             >
-                               <Check className="h-3 w-3" />
-                             </Button>
-                           )}
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               deleteNotification(notification.id);
-                             }}
-                             className="p-1 h-auto text-muted-foreground hover:text-destructive"
-                             aria-label="Delete notification"
-                           >
-                             <X className="h-3 w-3" />
-                           </Button>
-                         </div>
-                         <div className="flex-1 space-y-1">
-                           <div className="flex items-center space-x-2">
-                              <h4
-                                className={`text-sm font-medium whitespace-normal break-words ${
-                                  !notification.read ? "font-semibold" : ""
-                                }`}
-                                title={notification.title}
-                              >
-                                {notification.title}
-                              </h4>
-                             <Badge
-                               className={`text-xs ${getTypeColor(notification.type)}`}
-                               variant="outline"
-                             >
-                               {notification.type}
-                             </Badge>
-                           </div>
-                            <p
-                              className="text-sm text-muted-foreground whitespace-normal break-words"
-                              title={notification.message}
+                      <div className="flex items-start space-x-2">
+                        <div className="flex items-center space-x-1">
+                          {!notification.read && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(notification.id);
+                              }}
+                              className="p-1 h-auto"
+                              aria-label="Mark notification as read"
                             >
-                              {notification.message}
-                            </p>
-                           <p className="text-xs text-muted-foreground">
-                             {format(new Date(notification.created_at), "MMM dd, yyyy HH:mm")}
-                           </p>
-                         </div>
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNotification(notification.id);
+                            }}
+                            className="p-1 h-auto text-muted-foreground hover:text-destructive"
+                            aria-label="Delete notification"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
                         </div>
+
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <h4
+                              className={`text-sm font-medium whitespace-normal break-words ${
+                                !notification.read ? "font-semibold" : ""
+                              }`}
+                              title={notification.title}
+                            >
+                              {notification.title}
+                            </h4>
+                            <Badge
+                              className={`text-xs ${getTypeColor(notification.type)}`}
+                              variant="outline"
+                            >
+                              {notification.type}
+                            </Badge>
+                          </div>
+
+                          <p
+                            className="text-sm text-muted-foreground whitespace-normal break-words"
+                            title={notification.message}
+                          >
+                            {notification.message}
+                          </p>
+
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(notification.created_at), "MMM dd, yyyy HH:mm")}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                     {index < notifications.length - 1 && <Separator />}
                   </div>

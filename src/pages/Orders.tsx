@@ -14,6 +14,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { useToast } from "@/hooks/use-toast";
 import { format, subDays } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
+import type { NotificationType } from "@/hooks/useNotifications";
 
 interface OrderItem {
   id: string;
@@ -129,115 +130,65 @@ const Orders = () => {
 
   const updateOrderStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     try {
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('orders')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', orderId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      // Update local state - remove from active orders if status changes to received/cancelled or to_deliver for admin
-      if (newStatus === 'received' || newStatus === 'cancelled' || (userRole === 'admin' && newStatus === 'to_deliver')) {
-        setActiveOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
-        // Add to order history
-        const order = activeOrders.find(o => o.id === orderId);
-        if (order) {
-          setOrderHistory(prevHistory => [{ ...order, status: newStatus }, ...prevHistory]);
-        }
+      // Find the affected order
+      const order = activeOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      // Update local state reactively
+      if (['received', 'cancelled'].includes(newStatus) || (userRole === 'admin' && newStatus === 'to_deliver')) {
+        setActiveOrders(prev => prev.filter(o => o.id !== orderId));
+        setOrderHistory(prev => [{ ...order, status: newStatus }, ...prev]);
       } else {
-        // Update in active orders
-        setActiveOrders(prevOrders =>
-          prevOrders.map(order =>
-            order.id === orderId ? { ...order, status: newStatus } : order
-          )
-        );
+        setActiveOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
       }
 
-      // Create notification for the user based on status change
-       if (newStatus === 'confirmed') {
-         const order = activeOrders.find(o => o.id === orderId);
-         if (order) {
-           await createNotification(
-             order.user_id,
-             "Order Confirmed",
-             `Your order ${order.order_number} has been confirmed.`,
-             "success"
-           );
-         }
-       } else if (newStatus === 'to_deliver') {
-         const order = activeOrders.find(o => o.id === orderId);
-         if (order) {
-           await createNotification(
-             order.user_id,
-             "Order Ready for Delivery",
-             `Your order ${order.order_number} is ready for delivery.`,
-             "info"
-           );
-         }
-       } else if (newStatus === 'received') {
-        const order = activeOrders.find(o => o.id === orderId);
-        if (order) {
-          await createNotification(
-            order.user_id,
-            "Order Received",
-            `Your order ${order.order_number} has been received.`,
-            "success"
-          );
-        }
-       } else if (newStatus === 'cancelled') {
-         const order = activeOrders.find(o => o.id === orderId);
-         if (order) {
-           await createNotification(
-             order.user_id,
-             "Order Cancelled",
-             `Your order ${order.order_number} has been cancelled.`,
-             "error"
-           );
-         }
-       }
+      // Determine notification message
+      const notificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
+        pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
+        confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
+        to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
+        received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
+        cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "error" },
+      };
 
-        // Notify admins about the status change
-        const { data: adminRoles } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', 'admin');
+      const notif = notificationsByStatus[newStatus];
+      if (!notif) return;
 
-        const admins = adminRoles?.map(role => ({ id: role.user_id })) || [];
+      // Send notification to the user
+      await createNotification(order.user_id, notif.title, notif.message, notif.type);
 
-       if (admins && admins.length > 0) {
-        //  const { data: userProfile } = await supabase
-        //    .from('profiles')
-        //    .select('first_name, last_name')
-        //    .eq('id', user?.id)
-        //    .single();
-        const { data: userProfile, error: profileError } = await supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', user?.id)
-          .maybeSingle();
+      // Fetch all admin users (to include current admin too)
+      const { data: adminRoles, error: adminError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
 
-        if (profileError) {
-          console.warn('Profile fetch error:', profileError);
-        }
+      if (adminError) console.warn('Admin fetch error:', adminError);
 
-         const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}`.trim() : 'Unknown User';
-         const order = activeOrders.find(o => o.id === orderId);
+      const admins = adminRoles?.map(r => r.user_id) ?? [];
 
-        //  if (order) {
-        //    const adminNotifications = admins.map(admin => ({
-        //      user_id: admin.id,
-        //      title: "Order Status Updated",
-        //      message: `Order ${order.order_number} status changed to ${newStatus} by ${userName}`,
-        //      type: "info" as const
-        //    }));
-        //    await supabase.from('notifications').insert(adminNotifications);
-        //  }
-       }
+      // Admin also gets the same notification
+      const adminNotifications = admins.map(adminId => ({
+        user_id: adminId,
+        title: notif.title,
+        message: notif.message + ` (User: ${order.user_id})`,
+        type: notif.type,
+      }));
 
-       toast({
+      await supabase.from('notifications').insert(adminNotifications);
+
+      toast({
         title: "Status Updated",
         description: `Order status changed to ${newStatus}`,
       });
+
     } catch (error) {
       console.error('Error updating order status:', error);
       toast({
@@ -246,8 +197,7 @@ const Orders = () => {
         variant: "destructive",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [toast, activeOrders, createNotification, userRole]);
+  }, [toast, activeOrders, createNotification, userRole]);
 
   const toggleOrderDetails = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
