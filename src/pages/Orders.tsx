@@ -151,12 +151,12 @@ const Orders = () => {
 
       // Determine notification message
       const notificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
-        pending: { title: "Order Pending", message: `Your order ₱{order.order_number} is pending.`, type: "info" },
-        confirmed: { title: "Order Confirmed", message: `Your order ₱{order.order_number} has been confirmed.`, type: "success" },
-        to_deliver: { title: "Order Ready for Delivery", message: `Your order ₱{order.order_number} is ready for delivery.`, type: "info" },
-        delivered: { title: "Order Delivered", message: `Your order ₱{order.order_number} has been delivered.`, type: "success" },
-        received: { title: "Order Received", message: `Your order ₱{order.order_number} has been received.`, type: "success" },
-        cancelled: { title: "Order Cancelled", message: `Your order ₱{order.order_number} has been cancelled.`, type: "error" },
+        pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
+        confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
+        to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
+        delivered: { title: "Order Delivered", message: `Your order ${order.order_number} has been delivered.`, type: "success" },
+        received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
+        cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "error" },
       };
 
       const notif = notificationsByStatus[newStatus];
@@ -179,7 +179,7 @@ const Orders = () => {
       const adminNotifications = admins.map(adminId => ({
         user_id: adminId,
         title: notif.title,
-        message: notif.message + ` (User: ₱{order.user_id})`,
+        message: notif.message + ` (User: ${order.user_id})`,
         type: notif.type,
       }));
 
@@ -187,7 +187,7 @@ const Orders = () => {
 
       toast({
         title: "Status Updated",
-        description: `Order status changed to ₱{newStatus}`,
+        description: `Order status changed to ${newStatus}`,
       });
 
     } catch (error) {

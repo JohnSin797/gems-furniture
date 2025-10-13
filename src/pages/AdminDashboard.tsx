@@ -579,18 +579,17 @@ const AdminDashboard = () => {
                 {/* 🧭 Make table scrollable horizontally */}
                 <div className="w-full overflow-x-auto">
                   <Table className="min-w-full text-xs sm:text-sm">
-                     <TableHeader>
-                       <TableRow>
-                         <TableHead className="hidden sm:table-cell">Order ID</TableHead>
-                         <TableHead>Customer</TableHead>
-                         <TableHead>Amount</TableHead>
-                         <TableHead>Status</TableHead>
-                       </TableRow>
-                     </TableHeader>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="hidden sm:table-cell">Order ID</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
                     <TableBody>
                        {recentOrders.length === 0 ? (
                          <TableRow>
-                           <TableCell colSpan={3} className="text-center py-4 sm:col-span-4">
+                            <TableCell colSpan={2} className="text-center py-4 sm:col-span-3">
                              No recent orders
                            </TableCell>
                          </TableRow>
@@ -600,9 +599,7 @@ const AdminDashboard = () => {
                              <TableCell className="font-medium truncate hidden sm:table-cell">
                                {order.order_number}
                              </TableCell>
-                             <TableCell className="truncate">
-                               {order.customer_name}
-                             </TableCell>
+
                              <TableCell>₱{order.total_amount}</TableCell>
                              <TableCell>
                                <Badge className={getStatusColor(order.status)}>
@@ -765,7 +762,7 @@ const AdminDashboard = () => {
                 <TableBody>
                    {featuredCollections.length === 0 ? (
                      <TableRow>
-                       <TableCell colSpan={3} className="text-center py-4 sm:col-span-4">
+                            <TableCell colSpan={2} className="text-center py-4 sm:col-span-3">
                          No featured products
                        </TableCell>
                      </TableRow>

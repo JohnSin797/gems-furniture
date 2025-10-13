@@ -19,6 +19,7 @@ interface PurchaseModalProps {
     name: string;
     price: number;
     image: string;
+    quantity: number;
   };
 }
 
@@ -94,7 +95,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
   }, [isOpen, user, fetchAddress]);
 
   const handleQuantityChange = (delta: number) => {
-    const newQuantity = Math.max(1, quantity + delta);
+    const newQuantity = Math.max(1, Math.min(quantity + delta, product.quantity));
     setQuantity(newQuantity);
   };
 
@@ -153,7 +154,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
           subtotal: subtotal,
            shipping_amount: 0,
           total_amount: total,
-          order_number: `ORD-₱{Date.now()}`,
+           order_number: `ORD-${Date.now()}`,
            shipping_address: isEditingAddress ? {
              street: editedAddress.street_address,
              barangay: editedAddress.barangay,
@@ -188,18 +189,36 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
 
       if (itemError) throw itemError;
 
-      toast({
-        title: "Purchase confirmed!",
-        description: `Order ₱{order.order_number} has been placed successfully.`,
-      });
+      // Update inventory
+      const { data: currentInventory, error: fetchInventoryError } = await supabase
+        .from('inventory')
+        .select('quantity')
+        .eq('product_id', product.id)
+        .single();
 
-      // Create purchase notification
-      await createNotification(
-        user.id,
-        "New Pending Order",
-        `Your order ₱{order.order_number} for ₱{quantity} × ₱{product.name} has been placed successfully.`,
-        "info"
-      );
+      if (fetchInventoryError) throw fetchInventoryError;
+
+      const newQuantity = (currentInventory?.quantity || 0) - quantity;
+
+      const { error: inventoryError } = await supabase
+        .from('inventory')
+        .update({ quantity: newQuantity, updated_at: new Date().toISOString() })
+        .eq('product_id', product.id);
+
+      if (inventoryError) throw inventoryError;
+
+       toast({
+         title: "Purchase confirmed!",
+         description: `Order ${order.order_number} has been placed successfully.`,
+       });
+
+       // Create purchase notification
+       await createNotification(
+         user.id,
+         "New Pending Order",
+         `Your order ${order.order_number} for ${quantity} × ${product.name} has been placed successfully.`,
+         "info"
+       );
 
       // Notify admins about the new order
       const { data: adminRoles } = await supabase
@@ -216,17 +235,17 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
           .eq('id', user?.id)
           .single();
 
-        const userName = userProfile ? `₱{userProfile.first_name} ₱{userProfile.last_name}`.trim() : 'Unknown User';
+        const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}`.trim() : 'Unknown User';
 
-        // Create notification for each admin
-        for (const admin of admins) {
-          await createNotification(
-            admin.id,
-            "New Pending Order",
-            `New order ₱{order.order_number} placed by ₱{userName}`,
-            "info"
-          );
-        }
+         // Create notification for each admin
+         for (const admin of admins) {
+           await createNotification(
+             admin.id,
+             "New Pending Order",
+             `New order ${order.order_number} placed by ${userName}`,
+             "info"
+           );
+         }
       }
 
       onClose();

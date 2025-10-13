@@ -95,7 +95,7 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
       <PurchaseModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={{ id, name, price, image }}
+        product={{ id, name, price, image, quantity }}
       />
     </Card>
   );
