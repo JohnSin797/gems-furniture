@@ -51,7 +51,7 @@ const Orders = () => {
 
   const fetchActiveOrders = useCallback(async () => {
     try {
-      const activeStatuses = userRole === 'admin' ? ['pending', 'confirmed'] as const : ['pending', 'confirmed', 'to_deliver'] as const;
+      const activeStatuses = userRole === 'admin' ? ['pending', 'confirmed', 'to_deliver'] as const : ['pending', 'confirmed', 'to_deliver'] as const;
       let query = supabase
         .from('orders')
         .select(`
@@ -83,7 +83,7 @@ const Orders = () => {
   const fetchOrderHistory = useCallback(async () => {
     try {
       const thirtyDaysAgo = subDays(new Date(), 30);
-      const historyStatuses = userRole === 'admin' ? ['to_deliver', 'received', 'cancelled'] as const : ['received', 'cancelled'] as const;
+      const historyStatuses = ['delivered', 'received', 'cancelled'] as const;
       let query = supabase
         .from('orders')
         .select(`
@@ -142,7 +142,7 @@ const Orders = () => {
       if (!order) return;
 
       // Update local state reactively
-      if (['received', 'cancelled'].includes(newStatus) || (userRole === 'admin' && newStatus === 'to_deliver')) {
+      if (['delivered', 'received', 'cancelled'].includes(newStatus) || (userRole === 'admin' && newStatus === 'to_deliver')) {
         setActiveOrders(prev => prev.filter(o => o.id !== orderId));
         setOrderHistory(prev => [{ ...order, status: newStatus }, ...prev]);
       } else {
@@ -154,6 +154,7 @@ const Orders = () => {
         pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
         confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
         to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
+        delivered: { title: "Order Delivered", message: `Your order ${order.order_number} has been delivered.`, type: "success" },
         received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
         cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "error" },
       };
@@ -277,14 +278,15 @@ const Orders = () => {
                           </p>
                             <div className="flex items-center space-x-2 mt-1">
                               <span className="text-sm text-muted-foreground">Status:</span>
-                                <Badge className={
-                                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                  order.status === 'confirmed' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                                  order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                                  order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
-                                  order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
-                                  'bg-gray-100 text-gray-800 border-gray-200'
-                                }>
+                                 <Badge className={
+                                   order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                   order.status === 'confirmed' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                                   order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                   order.status === 'delivered' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                                   order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
+                                   order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
+                                   'bg-gray-100 text-gray-800 border-gray-200'
+                                 }>
                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                               </Badge>
                                {userRole === 'admin' && order.status === 'pending' && (
@@ -295,14 +297,22 @@ const Orders = () => {
                                    Confirm
                                  </Button>
                                )}
-                               {userRole === 'admin' && order.status === 'confirmed' && (
-                                 <Button
-                                   size="sm"
-                                   onClick={() => updateOrderStatus(order.id, "to_deliver")}
-                                 >
-                                   To Deliver
-                                 </Button>
-                               )}
+                                {userRole === 'admin' && order.status === 'confirmed' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => updateOrderStatus(order.id, "to_deliver")}
+                                  >
+                                    To Deliver
+                                  </Button>
+                                )}
+                                {userRole === 'admin' && order.status === 'to_deliver' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => updateOrderStatus(order.id, "delivered")}
+                                  >
+                                    Mark Delivered
+                                  </Button>
+                                )}
                                 {userRole !== 'admin' && order.status === 'to_deliver' && (
                                   <Button
                                     size="sm"
@@ -386,12 +396,12 @@ const Orders = () => {
                  <h3 className="text-xl font-semibold text-foreground mb-2">
                    {userRole === 'admin' ? 'No order history' : 'No order history yet'}
                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    {userRole === 'admin'
-                      ? 'To deliver, received, and cancelled orders will appear here.'
-                      : 'Your completed and cancelled orders will appear here.'
-                    }
-                  </p>
+                   <p className="text-muted-foreground mb-6">
+                      {userRole === 'admin'
+                        ? 'Delivered, received, and cancelled orders will appear here.'
+                        : 'Your completed and cancelled orders will appear here.'
+                      }
+                   </p>
                  {userRole !== 'admin' && (
                    <Button asChild>
                      <a href="/products">Browse Products</a>
@@ -415,12 +425,13 @@ const Orders = () => {
                              </p>
                              <div className="flex items-center space-x-2 mt-1">
                                <span className="text-sm text-muted-foreground">Status:</span>
-                                <Badge className={
-                                  order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
-                                  order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
-                                  order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                                  'bg-gray-100 text-gray-800 border-gray-200'
-                                }>
+                                 <Badge className={
+                                   order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
+                                   order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
+                                   order.status === 'delivered' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                                   order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                   'bg-gray-100 text-gray-800 border-gray-200'
+                                 }>
                                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                </Badge>
                              </div>
