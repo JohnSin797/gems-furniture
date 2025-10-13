@@ -82,11 +82,14 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
           {name}
         </h3>
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-charcoal">₱{price}</span>
-          {originalPrice && (
-            <span className="text-lg text-muted-foreground line-through">₱{originalPrice}</span>
-          )}
-        </div>
+           <span className="text-xl font-bold text-charcoal">₱{price}</span>
+           {originalPrice && (
+             <span className="text-lg text-muted-foreground line-through">₱{originalPrice}</span>
+           )}
+         </div>
+         <div className="text-sm text-muted-foreground">
+           {quantity > 0 ? `${quantity} in stock` : 'Out of stock'}
+         </div>
       </div>
 
       <PurchaseModal
