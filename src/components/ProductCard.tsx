@@ -58,7 +58,7 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
           className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white"
         >
           <Heart 
-            className={`h-4 w-4 transition-colors ${isLiked ? 'fill-terracotta text-terracotta' : 'text-charcoal'}`} 
+            className={`h-4 w-4 transition-colors ₱{isLiked ? 'fill-terracotta text-terracotta' : 'text-charcoal'}`} 
           />
         </button>
 
@@ -82,9 +82,9 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
           {name}
         </h3>
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-charcoal">${price}</span>
+          <span className="text-xl font-bold text-charcoal">₱{price}</span>
           {originalPrice && (
-            <span className="text-lg text-muted-foreground line-through">${originalPrice}</span>
+            <span className="text-lg text-muted-foreground line-through">₱{originalPrice}</span>
           )}
         </div>
       </div>

@@ -101,7 +101,7 @@ const AdminDashboard = () => {
     { title: "Total Products", value: "0", icon: Package, change: "+0%" },
     { title: "Orders Today", value: "0", icon: ShoppingCart, change: "+0%" },
     { title: "Active Users", value: "0", icon: Users, change: "+0%" },
-    { title: "Revenue", value: "$0", icon: TrendingUp, change: "+0%" },
+    { title: "Revenue", value: "₱0", icon: TrendingUp, change: "+0%" },
   ]);
   const [loading, setLoading] = useState(true);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
@@ -256,7 +256,7 @@ const AdminDashboard = () => {
             return {
               ...stat,
               value: todaysCount.toString(),
-              change: `${changeSign}${changePercent}%`
+              change: `₱{changeSign}₱{changePercent}%`
             };
           }
           if (stat.title === "Active Users") {
@@ -267,7 +267,7 @@ const AdminDashboard = () => {
             return {
               ...stat,
               value: activeUsersCount.toString(),
-              change: `${changeSign}${changePercent}%`
+              change: `₱{changeSign}₱{changePercent}%`
             };
           }
           if (stat.title === "Revenue") {
@@ -277,7 +277,7 @@ const AdminDashboard = () => {
             const changeSign = totalRevenue >= lastMonthRevenue ? "+" : "";
             return {
               ...stat,
-              value: `$${totalRevenue.toFixed(2)}`,
+              value: `₱${totalRevenue.toFixed(2)}`,
               change: `${changeSign}${changePercent}%`
             };
           }
@@ -373,7 +373,7 @@ const AdminDashboard = () => {
           id: order.id,
           order_number: order.order_number,
           customer_name: user
-            ? `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim()
+            ? `₱{user.first_name ?? ""} ₱{user.last_name ?? ""}`.trim()
             : "Unknown Customer",
           product_name: order.order_items?.[0]?.product_name ?? "Unknown Product",
           total_amount: order.total_amount,
@@ -544,7 +544,7 @@ const AdminDashboard = () => {
               "bg-green-50",
             ];
             return (
-              <Card key={idx} className={`${bgColors[idx]} rounded-xl`}>
+              <Card key={idx} className={`₱{bgColors[idx]} rounded-xl`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                     {stat.title}
@@ -603,7 +603,7 @@ const AdminDashboard = () => {
                              <TableCell className="truncate">
                                {order.customer_name}
                              </TableCell>
-                             <TableCell>${order.total_amount}</TableCell>
+                             <TableCell>₱{order.total_amount}</TableCell>
                              <TableCell>
                                <Badge className={getStatusColor(order.status)}>
                                  {order.status}
@@ -674,7 +674,7 @@ const AdminDashboard = () => {
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell>${product.price}</TableCell>
+                            <TableCell>₱{product.price}</TableCell>
                             <TableCell>
                               {product.inventory?.quantity ?? 0}
                             </TableCell>
@@ -781,7 +781,7 @@ const AdminDashboard = () => {
                            </div>
                          </TableCell>
                          <TableCell className="hidden sm:table-cell">{fc.products?.category ?? "Unknown"}</TableCell>
-                         <TableCell>${fc.products?.price ?? "N/A"}</TableCell>
+                         <TableCell>₱{fc.products?.price ?? "N/A"}</TableCell>
                          <TableCell className="text-center">
                            <Button
                              variant="outline"

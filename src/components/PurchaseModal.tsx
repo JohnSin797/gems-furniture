@@ -153,7 +153,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
           subtotal: subtotal,
            shipping_amount: 0,
           total_amount: total,
-          order_number: `ORD-${Date.now()}`,
+          order_number: `ORD-₱{Date.now()}`,
            shipping_address: isEditingAddress ? {
              street: editedAddress.street_address,
              barangay: editedAddress.barangay,
@@ -190,14 +190,14 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
 
       toast({
         title: "Purchase confirmed!",
-        description: `Order ${order.order_number} has been placed successfully.`,
+        description: `Order ₱{order.order_number} has been placed successfully.`,
       });
 
       // Create purchase notification
       await createNotification(
         user.id,
         "New Pending Order",
-        `Your order ${order.order_number} for ${quantity} × ${product.name} has been placed successfully.`,
+        `Your order ₱{order.order_number} for ₱{quantity} × ₱{product.name} has been placed successfully.`,
         "info"
       );
 
@@ -216,14 +216,14 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
           .eq('id', user?.id)
           .single();
 
-        const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}`.trim() : 'Unknown User';
+        const userName = userProfile ? `₱{userProfile.first_name} ₱{userProfile.last_name}`.trim() : 'Unknown User';
 
         // Create notification for each admin
         for (const admin of admins) {
           await createNotification(
             admin.id,
             "New Pending Order",
-            `New order ${order.order_number} placed by ${userName}`,
+            `New order ₱{order.order_number} placed by ₱{userName}`,
             "info"
           );
         }
@@ -287,7 +287,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
             />
             <div>
               <h3 className="font-semibold">{product.name}</h3>
-              <p className="text-sm text-muted-foreground">${product.price}</p>
+              <p className="text-sm text-muted-foreground">₱{product.price}</p>
             </div>
           </div>
 
@@ -436,13 +436,13 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
             <h4 className="font-semibold">Order Summary</h4>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <span>Subtotal ({quantity} × ${product.price})</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>Subtotal ({quantity} × ₱{product.price})</span>
+                <span>₱{subtotal.toFixed(2)}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>₱{total.toFixed(2)}</span>
               </div>
             </div>
           </div>

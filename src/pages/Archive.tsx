@@ -187,7 +187,7 @@ const Archive = () => {
                         <div className="text-sm text-muted-foreground">{product.category}</div>
                       </div>
                     </TableCell>
-                    <TableCell>${product.price}</TableCell>
+                    <TableCell>₱{product.price}</TableCell>
                     <TableCell>{product.inventory?.[0]?.quantity || 0}</TableCell>
                     <TableCell>
                       {new Date(product.created_at).toLocaleDateString()}

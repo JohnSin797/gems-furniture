@@ -151,12 +151,12 @@ const Orders = () => {
 
       // Determine notification message
       const notificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
-        pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
-        confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
-        to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
-        delivered: { title: "Order Delivered", message: `Your order ${order.order_number} has been delivered.`, type: "success" },
-        received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
-        cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "error" },
+        pending: { title: "Order Pending", message: `Your order ₱{order.order_number} is pending.`, type: "info" },
+        confirmed: { title: "Order Confirmed", message: `Your order ₱{order.order_number} has been confirmed.`, type: "success" },
+        to_deliver: { title: "Order Ready for Delivery", message: `Your order ₱{order.order_number} is ready for delivery.`, type: "info" },
+        delivered: { title: "Order Delivered", message: `Your order ₱{order.order_number} has been delivered.`, type: "success" },
+        received: { title: "Order Received", message: `Your order ₱{order.order_number} has been received.`, type: "success" },
+        cancelled: { title: "Order Cancelled", message: `Your order ₱{order.order_number} has been cancelled.`, type: "error" },
       };
 
       const notif = notificationsByStatus[newStatus];
@@ -179,7 +179,7 @@ const Orders = () => {
       const adminNotifications = admins.map(adminId => ({
         user_id: adminId,
         title: notif.title,
-        message: notif.message + ` (User: ${order.user_id})`,
+        message: notif.message + ` (User: ₱{order.user_id})`,
         type: notif.type,
       }));
 
@@ -187,7 +187,7 @@ const Orders = () => {
 
       toast({
         title: "Status Updated",
-        description: `Order status changed to ${newStatus}`,
+        description: `Order status changed to ₱{newStatus}`,
       });
 
     } catch (error) {
@@ -332,11 +332,11 @@ const Orders = () => {
                          </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Subtotal</p>
-                            <p className="font-semibold">${order.subtotal.toFixed(2)}</p>
+                            <p className="font-semibold">₱{order.subtotal.toFixed(2)}</p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Total</p>
-                            <p className="font-semibold">${order.total_amount.toFixed(2)}</p>
+                            <p className="font-semibold">₱{order.total_amount.toFixed(2)}</p>
                           </div>
                        </div>
                      </div>
@@ -370,11 +370,11 @@ const Orders = () => {
                               <div className="flex-1">
                                 <h5 className="font-medium text-foreground">{item.product_name}</h5>
                                 <p className="text-sm text-muted-foreground">
-                                  Quantity: {item.quantity} × ${item.unit_price.toFixed(2)}
+                                  Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="font-semibold">${item.total_price.toFixed(2)}</p>
+                                <p className="font-semibold">₱{item.total_price.toFixed(2)}</p>
                               </div>
                             </div>
                           ))}
@@ -445,11 +445,11 @@ const Orders = () => {
                              </div>
                              <div>
                                <p className="text-sm text-muted-foreground">Subtotal</p>
-                               <p className="font-semibold">${order.subtotal.toFixed(2)}</p>
+                               <p className="font-semibold">₱{order.subtotal.toFixed(2)}</p>
                              </div>
                              <div>
                                <p className="text-sm text-muted-foreground">Total</p>
-                               <p className="font-semibold">${order.total_amount.toFixed(2)}</p>
+                               <p className="font-semibold">₱{order.total_amount.toFixed(2)}</p>
                              </div>
                            </div>
                          </div>
@@ -483,11 +483,11 @@ const Orders = () => {
                                    <div className="flex-1">
                                      <h5 className="font-medium text-foreground">{item.product_name}</h5>
                                      <p className="text-sm text-muted-foreground">
-                                       Quantity: {item.quantity} × ${item.unit_price.toFixed(2)}
+                                       Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
                                      </p>
                                    </div>
                                    <div className="text-right">
-                                     <p className="font-semibold">${item.total_price.toFixed(2)}</p>
+                                     <p className="font-semibold">₱{item.total_price.toFixed(2)}</p>
                                    </div>
                                  </div>
                                ))}
