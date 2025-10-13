@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import PurchaseModal from "./PurchaseModal";
 
 interface ProductCardProps {
@@ -21,6 +20,7 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
   const [isLiked, setIsLiked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, userRole } = useAuth();
+  const { addToCart } = useCart();
 
   const handleBuyNow = () => {
     if (!user) {
@@ -28,6 +28,18 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
       return;
     }
     setIsModalOpen(true);
+  };
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      // Handle unauthenticated user - could redirect to login
+      return;
+    }
+    try {
+      await addToCart(id, 1);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
   };
 
   return (
@@ -62,15 +74,25 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
           />
         </button>
 
-        {/* Buy now button */}
+        {/* Action buttons */}
         {userRole !== 'admin' && quantity > 0 && (
           <div className="absolute bottom-4 left-4 right-4 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 md:transform md:translate-y-2 md:group-hover:translate-y-0">
-            <Button
-              onClick={handleBuyNow}
-              className="w-full"
-            >
-              Buy Now
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAddToCart}
+                variant="outline"
+                className="flex-1"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Add to Cart
+              </Button>
+              <Button
+                onClick={handleBuyNow}
+                className="flex-1"
+              >
+                Buy Now
+              </Button>
+            </div>
           </div>
         )}
       </div>

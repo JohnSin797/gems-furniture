@@ -268,8 +268,50 @@ export type Database = {
            zip_code?: string | null
          }
          Relationships: []
-        }
-      notifications: {
+       }
+       cart: {
+         Row: {
+           created_at: string
+           id: string
+           product_id: string
+           quantity: number
+           updated_at: string
+           user_id: string
+         }
+         Insert: {
+           created_at?: string
+           id?: string
+           product_id: string
+           quantity?: number
+           updated_at?: string
+           user_id: string
+         }
+         Update: {
+           created_at?: string
+           id?: string
+           product_id?: string
+           quantity?: number
+           updated_at?: string
+           user_id?: string
+         }
+         Relationships: [
+           {
+             foreignKeyName: "cart_product_id_fkey"
+             columns: ["product_id"]
+             isOneToOne: false
+             referencedRelation: "products"
+             referencedColumns: ["id"]
+           },
+           {
+             foreignKeyName: "cart_user_id_fkey"
+             columns: ["user_id"]
+             isOneToOne: false
+             referencedRelation: "profiles"
+             referencedColumns: ["user_id"]
+           },
+         ]
+       }
+       notifications: {
         Row: {
           created_at: string
           id: string

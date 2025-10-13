@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import { useNotifications } from "@/hooks/useNotifications";
 import Notifications from "@/components/Notifications";
@@ -21,6 +22,7 @@ const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
+  const { totalItems } = useCart();
   const navigate = useNavigate();
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -183,10 +185,15 @@ const Navigation = () => {
               {user && <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">Orders</Link>}
                {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Dashboard</Link>}
 
-            <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10 rounded-full hover:bg-terracotta/10" onClick={handleNotificationClick}>
-              <Bell className="h-5 w-5 text-muted-foreground hover:text-terracotta" />
-              {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium">{unreadCount > 99 ? "99+" : unreadCount}</Badge>}
-            </Button>
+             <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10 rounded-full hover:bg-terracotta/10" onClick={() => navigate('/cart')}>
+               <ShoppingBag className="h-5 w-5 text-muted-foreground hover:text-terracotta" />
+               {totalItems > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium">{totalItems > 99 ? "99+" : totalItems}</Badge>}
+             </Button>
+
+             <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10 rounded-full hover:bg-terracotta/10" onClick={handleNotificationClick}>
+               <Bell className="h-5 w-5 text-muted-foreground hover:text-terracotta" />
+               {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs font-medium">{unreadCount > 99 ? "99+" : unreadCount}</Badge>}
+             </Button>
 
              <div className="hidden md:flex items-center space-x-2">
                {user ? (
