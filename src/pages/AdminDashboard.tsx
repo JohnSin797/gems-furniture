@@ -38,7 +38,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ProductDialog, ProductStatus } from "@/components/ProductDialog";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { AddStockDialog } from "@/components/AddStockDialog";
 import { useToast } from "@/hooks/use-toast";
+import { Tables } from "@/integrations/supabase/types";
 
 export interface ProductWithInventory {
   id: string;
@@ -109,6 +111,8 @@ const AdminDashboard = () => {
     useState<ProductWithInventory | null>(null);
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [productToArchive, setProductToArchive] = useState<string | null>(null);
+  const [addStockDialogOpen, setAddStockDialogOpen] = useState(false);
+  const [productToAddStock, setProductToAddStock] = useState<ProductWithInventory | null>(null);
   const [featuredCollections, setFeaturedCollections] = useState<
     FeaturedCollection[]
   >([]);
@@ -150,7 +154,20 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
-      const normalizedData: ProductWithInventory[] = data.map((p: any) => ({
+      const normalizedData: ProductWithInventory[] = data.map((p: {
+        id: string;
+        name: string;
+        price: number;
+        category: string;
+        status: string;
+        type?: string;
+        description?: string;
+        image_url?: string;
+        created_at: string;
+        created_by?: string;
+        updated_at: string;
+        inventory: Tables<'inventory'> | null;
+      }) => ({
         ...p,
         inventory: Array.isArray(p.inventory)
           ? p.inventory[0] || null
@@ -432,6 +449,16 @@ const AdminDashboard = () => {
     setProductDialogOpen(true);
   };
 
+  const handleAddStock = (product: ProductWithInventory) => {
+    setProductToAddStock(product);
+    setAddStockDialogOpen(true);
+  };
+
+  const handleStockAdded = () => {
+    fetchProducts();
+    fetchStats();
+  };
+
   const handleProductSaved = () => {
     fetchProducts();
     fetchStats();
@@ -634,76 +661,84 @@ const AdminDashboard = () => {
             </CardHeader>
 
             <CardContent>
-              <ScrollArea className="h-[250px] sm:h-[300px]">
-                <div className="w-full overflow-x-auto">
+              <div className="h-[250px] sm:h-[300px] overflow-auto overflow-x-auto">
+                <div className="w-full">
                   <Table className="min-w-full text-xs sm:text-sm">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[40%]">Product</TableHead>
-                        <TableHead className="w-[20%]">Price</TableHead>
-                        <TableHead className="w-[20%]">Stock</TableHead>
-                        <TableHead className="w-[20%] text-center">
-                          Actions
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
+                     <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[250px]">Product</TableHead>
+                          <TableHead className="w-[12%]">Price</TableHead>
+                          <TableHead className="w-[12%]">Stock</TableHead>
+                          <TableHead className="w-[18%] text-center">
+                            Actions
+                          </TableHead>
+                        </TableRow>
+                     </TableHeader>
                     <TableBody>
-                      {loading ? (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center py-4">
-                            Loading products...
-                          </TableCell>
-                        </TableRow>
-                      ) : products.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center py-4">
-                            No products found
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        products.map((product) => (
-                          <TableRow key={product.id}>
-                            <TableCell className="truncate">
-                              <div>
-                                <div className="font-medium">{product.name}</div>
-                                <div className="text-xs sm:text-sm text-muted-foreground truncate">
-                                  {product.category}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>₱{product.price}</TableCell>
-                            <TableCell>
-                              {product.inventory?.quantity ?? 0}
-                            </TableCell>
+                       {loading ? (
+                         <TableRow>
+                           <TableCell colSpan={4} className="text-center py-4">
+                             Loading products...
+                           </TableCell>
+                         </TableRow>
+                       ) : products.length === 0 ? (
+                         <TableRow>
+                           <TableCell colSpan={4} className="text-center py-4">
+                             No products found
+                           </TableCell>
+                         </TableRow>
+                       ) : (
+                         products.map((product) => (
+                           <TableRow key={product.id}>
+                               <TableCell>
+                                 <div>
+                                   <div className="font-medium break-words whitespace-normal">{product.name}</div>
+                                   <div className="text-xs sm:text-sm text-muted-foreground break-words whitespace-normal">
+                                     {product.category}
+                                   </div>
+                                 </div>
+                               </TableCell>
+                             <TableCell>₱{product.price}</TableCell>
                              <TableCell>
-                               <div className="flex justify-center space-x-1 sm:space-x-2">
-                                 <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() => handleEditProduct(product)}
-                                   className="h-9 w-9 sm:h-8 sm:w-8 p-0"
-                                 >
-                                   <Edit className="h-3 w-3" />
-                                 </Button>
-                                 <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() =>
-                                     handleArchiveProduct(product.id)
-                                   }
-                                   className="h-9 w-9 sm:h-8 sm:w-8 p-0"
-                                 >
-                                   <Trash2 className="h-3 w-3" />
-                                 </Button>
-                               </div>
+                               {product.inventory?.quantity ?? 0}
                              </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </ScrollArea>
+                               <TableCell>
+                                 <div className="flex justify-center space-x-1 sm:space-x-2">
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() => handleEditProduct(product)}
+                                     className="h-9 w-9 sm:h-8 sm:w-8 p-0"
+                                   >
+                                     <Edit className="h-3 w-3" />
+                                   </Button>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() => handleAddStock(product)}
+                                     className="h-9 w-9 sm:h-8 sm:w-8 p-0"
+                                   >
+                                     <Plus className="h-3 w-3" />
+                                   </Button>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() =>
+                                       handleArchiveProduct(product.id)
+                                     }
+                                     className="h-9 w-9 sm:h-8 sm:w-8 p-0"
+                                   >
+                                     <Trash2 className="h-3 w-3" />
+                                   </Button>
+                                 </div>
+                               </TableCell>
+                           </TableRow>
+                         ))
+                       )}
+                     </TableBody>
+                   </Table>
+                 </div>
+               </div>
             </CardContent>
           </Card>
         </div>
@@ -769,14 +804,14 @@ const AdminDashboard = () => {
                    ) : (
                      featuredCollections.map((fc) => (
                        <TableRow key={fc.id}>
-                         <TableCell className="truncate">
-                           <div>
-                             <div className="font-medium">{fc.products?.name ?? "Unknown Product"}</div>
-                             <div className="text-xs text-muted-foreground sm:hidden">
-                               {fc.products?.category ?? "Unknown"}
-                             </div>
-                           </div>
-                         </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium break-words">{fc.products?.name ?? "Unknown Product"}</div>
+                              <div className="text-xs text-muted-foreground sm:hidden break-words">
+                                {fc.products?.category ?? "Unknown"}
+                              </div>
+                            </div>
+                          </TableCell>
                          <TableCell className="hidden sm:table-cell">{fc.products?.category ?? "Unknown"}</TableCell>
                          <TableCell>₱{fc.products?.price ?? "N/A"}</TableCell>
                          <TableCell className="text-center">
@@ -816,6 +851,13 @@ const AdminDashboard = () => {
         cancelText="Cancel"
         onConfirm={confirmArchiveProduct}
         variant="destructive"
+      />
+
+      <AddStockDialog
+        open={addStockDialogOpen}
+        onOpenChange={setAddStockDialogOpen}
+        product={productToAddStock}
+        onStockAdded={handleStockAdded}
       />
     </AdminLayout>
   );

@@ -79,10 +79,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <LayoutDashboard className="size-4" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Admin Panel</span>
-                <span className="truncate text-xs text-sidebar-foreground/70">Gems Furniture</span>
-              </div>
+               <div className="grid flex-1 text-left text-sm leading-tight">
+                 <span className="overflow-hidden overflow-x-auto whitespace-nowrap font-semibold">Admin Panel</span>
+                 <span className="overflow-hidden overflow-x-auto whitespace-nowrap text-xs text-sidebar-foreground/70">Gems Furniture</span>
+               </div>
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -112,12 +112,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                       <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground">
                         <User className="size-4" />
                       </div>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">
-                          {user?.email?.split('@')[0] || 'Admin'}
-                        </span>
-                        <span className="truncate text-xs text-sidebar-foreground/70">Administrator</span>
-                      </div>
+                       <div className="grid flex-1 text-left text-sm leading-tight">
+                         <span className="overflow-hidden overflow-x-auto whitespace-nowrap font-semibold">
+                           {user?.email?.split('@')[0] || 'Admin'}
+                         </span>
+                         <span className="overflow-hidden overflow-x-auto whitespace-nowrap text-xs text-sidebar-foreground/70">Administrator</span>
+                       </div>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
