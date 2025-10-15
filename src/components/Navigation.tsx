@@ -39,7 +39,7 @@ const Navigation = () => {
   if (!file) return;
 
   setIsProcessingImage(true);
-  toast({ title: "Processing image", description: "Analyzing your image..." });
+  const processingToast = toast({ title: "Processing image", description: "Analyzing your image..." });
 
   try {
     const formData = new FormData();
@@ -77,7 +77,7 @@ const Navigation = () => {
       },
     });
 
-    toast({
+    processingToast.update({
       title: "Image search completed",
       description: matchingProducts?.length
         ? `Found ${matchingProducts.length} similar products`
@@ -85,7 +85,7 @@ const Navigation = () => {
     });
   } catch (error) {
     console.error("Image search error:", error);
-    toast({
+    processingToast.update({
       title: "Search failed",
       description: "Failed to analyze image.",
       variant: "destructive",
