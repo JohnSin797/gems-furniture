@@ -35,47 +35,67 @@ const Navigation = () => {
   };
 
   const handleImageCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    setIsProcessingImage(true);
-    toast({ title: "Processing image", description: "Analyzing your image..." });
+  setIsProcessingImage(true);
+  toast({ title: "Processing image", description: "Analyzing your image..." });
 
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
 
-      console.log("Sending image search request...");
-      const res = await fetch(
-        "https://zdktmnzetynreahdpjim.supabase.co/functions/v1/image-search",
-        { method: "POST", body: formData }
-      );
+    // 🔹 Get the user's Supabase session to include the access token
+    const { data, error } = await supabase.auth.getSession();
+    if (error) console.error("Error fetching session:", error);
+    const token = data?.session?.access_token;
 
-      const data = await res.json();
+    console.log("Sending image search request...");
 
-      const { searchTerms, matchingProducts } = data;
-
-      navigate("/products", {
-        state: {
-          imageSearchResults: matchingProducts || [],
-          searchTerms: searchTerms || [],
+    const res = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/image-search`,
+      {
+        method: "POST",
+        headers: {
+          ...(token
+            ? { Authorization: `Bearer ${token}` }
+            : { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` }), // ✅ fallback if not logged in
         },
-      });
+        body: formData,
+      }
+    );
 
-      toast({
-        title: "Image search completed",
-        description: matchingProducts?.length
-          ? `Found ${matchingProducts.length} similar products`
-          : "No products found",
-      });
-    } catch (error) {
-      console.error("Image search error:", error);
-      toast({ title: "Search failed", description: "Failed to analyze image.", variant: "destructive" });
-    } finally {
-      setIsProcessingImage(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
+    const dataResp = await res.json();
+    console.log("Image search response:", dataResp);
+
+    const { searchTerms, matchingProducts } = dataResp;
+
+    navigate("/products", {
+      state: {
+        imageSearchResults: matchingProducts || [],
+        searchTerms: searchTerms || [],
+      },
+    });
+
+    toast({
+      title: "Image search completed",
+      description: matchingProducts?.length
+        ? `Found ${matchingProducts.length} similar products`
+        : "No products found",
+    });
+  } catch (error) {
+    console.error("Image search error:", error);
+    toast({
+      title: "Search failed",
+      description: "Failed to analyze image.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsProcessingImage(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+};
+
 
   const handleSearch = async () => {
     const trimmedQuery = searchQuery.trim();
