@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface Product {
   id: string;
@@ -23,6 +25,8 @@ interface AddStockDialogProps {
 
 export const AddStockDialog = ({ open, onOpenChange, product, onStockAdded }: AddStockDialogProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { createNotification } = useNotifications();
   const [loading, setLoading] = useState(false);
   const [quantityToAdd, setQuantityToAdd] = useState("");
 
@@ -62,6 +66,16 @@ export const AddStockDialog = ({ open, onOpenChange, product, onStockAdded }: Ad
         title: "Success",
         description: `Added ${quantityToAdd} units to ${product.name}. New stock: ${newQuantity}`,
       });
+
+      // Create notification for stock addition
+      if (user?.id) {
+        await createNotification(
+          user.id,
+          "Stock Added",
+          `Successfully added ${quantityToAdd} units to ${product.name}. New stock level: ${newQuantity}`,
+          "success"
+        );
+      }
 
       setQuantityToAdd("");
       onStockAdded();

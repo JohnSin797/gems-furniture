@@ -273,7 +273,7 @@ const AdminDashboard = () => {
             return {
               ...stat,
               value: todaysCount.toString(),
-              change: `₱{changeSign}₱{changePercent}%`
+              change: `${changeSign}${changePercent}%`
             };
           }
           if (stat.title === "Active Users") {
@@ -284,7 +284,7 @@ const AdminDashboard = () => {
             return {
               ...stat,
               value: activeUsersCount.toString(),
-              change: `₱{changeSign}₱{changePercent}%`
+              change: `${changeSign}${changePercent}%`
             };
           }
           if (stat.title === "Revenue") {
@@ -390,7 +390,7 @@ const AdminDashboard = () => {
           id: order.id,
           order_number: order.order_number,
           customer_name: user
-            ? `₱{user.first_name ?? ""} ₱{user.last_name ?? ""}`.trim()
+            ? `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim()
             : "Unknown Customer",
           product_name: order.order_items?.[0]?.product_name ?? "Unknown Product",
           total_amount: order.total_amount,
@@ -571,7 +571,7 @@ const AdminDashboard = () => {
               "bg-green-50",
             ];
             return (
-              <Card key={idx} className={`₱{bgColors[idx]} rounded-xl`}>
+              <Card key={idx} className={`${bgColors[idx]} rounded-xl`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                     {stat.title}
