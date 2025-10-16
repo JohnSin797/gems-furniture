@@ -115,7 +115,7 @@ const Products = () => {
   const content = (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">{imageSearchActive ? "Image Search Results" : textSearchActive ? "Search Results" : "Products"}</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-4 text-center md:text-left">{imageSearchActive ? "Image Search Results" : textSearchActive ? "Search Results" : "Products"}</h1>
           <p className="text-muted-foreground mb-4">{imageSearchActive ? "Products matching your uploaded image" : textSearchActive ? `Products matching "${textSearchQuery}"` : "Discover our curated collection of premium furniture"}</p>
 
           {imageSearchActive && (
