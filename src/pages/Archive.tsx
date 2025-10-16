@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import type { Database } from "@/integrations/supabase/types";
 
 export interface ArchivedProduct {
   id: string;
@@ -63,10 +64,14 @@ const Archive = () => {
 
       if (error) throw error;
 
-      const normalizedData: ArchivedProduct[] = (data || []).map((p: any) => ({
+      type ProductWithInventory = Database["public"]["Tables"]["products"]["Row"] & {
+        inventory: Database["public"]["Tables"]["inventory"]["Row"][] | null;
+      };
+
+      const normalizedData: ArchivedProduct[] = ((data as unknown) as ProductWithInventory[] || []).map((p) => ({
         ...p,
-        inventory: Array.isArray(p.inventory)
-          ? p.inventory.map((inv: any) => ({ quantity: inv.quantity }))
+        inventory: Array.isArray(p.inventory) && p.inventory.length > 0
+          ? p.inventory.map((inv) => ({ quantity: inv.quantity }))
           : [],
         status: p.status as "active" | "inactive" | "discontinued",
       }));
@@ -101,7 +106,7 @@ const Archive = () => {
       if (error) throw error;
       toast({ title: "Success", description: "Product restored successfully" });
       fetchArchivedProducts();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error restoring product:", error);
       toast({ title: "Error", description: "Failed to restore product", variant: "destructive" });
     }
@@ -120,9 +125,13 @@ const Archive = () => {
       if (error) throw error;
       toast({ title: "Success", description: "Product permanently deleted" });
       fetchArchivedProducts();
-    } catch (error: any) {
-      console.error("Error deleting product:", error);
-      toast({ title: "Error", description: "Failed to delete product", variant: "destructive" });
+    } catch (error) {
+      console.error('Error fetching archived products:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch archived products",
+        variant: "destructive",
+      });
     }
   };
 
@@ -154,72 +163,123 @@ const Archive = () => {
             <CardDescription>Products that have been archived but can be restored</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[200px]">Product</TableHead>
-                    <TableHead className="min-w-[100px]">Price</TableHead>
-                    <TableHead className="min-w-[80px]">Stock</TableHead>
-                    <TableHead className="min-w-[120px]">Archived Date</TableHead>
-                    <TableHead className="min-w-[150px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center">Loading archived products...</TableCell>
-                  </TableRow>
-                ) : products.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      <div className="flex flex-col items-center gap-2">
-                        <ArchiveIcon className="h-12 w-12 text-muted-foreground" />
-                        <p className="text-muted-foreground">No archived products found</p>
+            {loading ? (
+              <div className="text-center py-8">Loading archived products...</div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="flex flex-col items-center gap-2">
+                  <ArchiveIcon className="h-12 w-12 text-muted-foreground" />
+                  <p className="text-muted-foreground">No archived products found</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[200px]">Product</TableHead>
+                        <TableHead className="min-w-[100px]">Price</TableHead>
+                        <TableHead className="min-w-[80px]">Stock</TableHead>
+                        <TableHead className="min-w-[120px]">Archived Date</TableHead>
+                        <TableHead className="min-w-[150px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products.map(product => (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{product.name}</div>
+                              <div className="text-sm text-muted-foreground">{product.category}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>₱{product.price}</TableCell>
+                          <TableCell>{product.inventory?.[0]?.quantity || 0}</TableCell>
+                          <TableCell>
+                            {new Date(product.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRestoreProduct(product.id)}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Restore
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePermanentDelete(product.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {products.map(product => (
+                    <Card key={product.id} className="p-4">
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-charcoal">{product.name}</h3>
+                          <p className="text-sm text-muted-foreground">{product.category}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Price:</span>
+                            <p className="font-medium">₱{product.price}</p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Stock:</span>
+                            <p className="font-medium">{product.inventory?.[0]?.quantity || 0}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">Archived Date:</span>
+                            <p className="font-medium">{new Date(product.created_at).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRestoreProduct(product.id)}
+                            className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Restore
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePermanentDelete(product.id)}
+                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ) : products.map(product => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-muted-foreground">{product.category}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>₱{product.price}</TableCell>
-                    <TableCell>{product.inventory?.[0]?.quantity || 0}</TableCell>
-                    <TableCell>
-                      {new Date(product.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRestoreProduct(product.id)}
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                        >
-                          <RotateCcw className="h-3 w-3 mr-1" />
-                          Restore
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePermanentDelete(product.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-3 w-3 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-               </TableBody>
-               </Table>
-             </div>
-           </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
+          </CardContent>
         </Card>
 
         <ConfirmationDialog
