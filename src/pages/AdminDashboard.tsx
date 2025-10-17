@@ -120,16 +120,16 @@ const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
 
   // Restrict access to admin
-  useEffect(() => {
-    if (userRole && userRole !== "admin") {
-      toast({
-        title: "Access Denied",
-        description: "You need admin privileges to access this page",
-        variant: "destructive",
-      });
-      window.location.href = "/";
-    }
-  }, [userRole, toast]);
+  // useEffect(() => {
+  //   if (userRole && userRole !== "admin") {
+  //     toast({
+  //       title: "Access Denied",
+  //       description: "You need admin privileges to access this page",
+  //       variant: "destructive",
+  //     });
+  //     window.location.href = "/";
+  //   }
+  // }, [userRole, toast]);
 
   // Fetch products with inventory (1-to-1)
   const fetchProducts = useCallback(async () => {
