@@ -44,6 +44,10 @@ All colors MUST be HSL.
     --charcoal: 25 15% 15%;
     --terracotta: 15 65% 65%;
 
+    /* Chart colors */
+    --chart-1: 120 15% 45%;
+    --chart-2: 15 65% 65%;
+
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--sage)) 0%, hsl(var(--sage-light)) 100%);
     --gradient-card: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
@@ -110,6 +114,10 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Chart colors */
+    --chart-1: 120 15% 65%;
+    --chart-2: 15 65% 75%;
   }
 
 

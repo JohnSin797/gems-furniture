@@ -25,6 +25,12 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Bar, BarChart, Line, LineChart, XAxis, YAxis } from "recharts";
+import {
   Package,
   ShoppingCart,
   Users,
@@ -94,6 +100,16 @@ interface RecentOrder {
   created_at: string;
 }
 
+interface OrdersChartData {
+  month: string;
+  orders: number;
+}
+
+interface StocksChartData {
+  category: string;
+  stock: number;
+}
+
 const AdminDashboard = () => {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
@@ -118,18 +134,8 @@ const AdminDashboard = () => {
   >([]);
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-
-  // Restrict access to admin
-  // useEffect(() => {
-  //   if (userRole && userRole !== "admin") {
-  //     toast({
-  //       title: "Access Denied",
-  //       description: "You need admin privileges to access this page",
-  //       variant: "destructive",
-  //     });
-  //     window.location.href = "/";
-  //   }
-  // }, [userRole, toast]);
+  const [ordersChartData, setOrdersChartData] = useState<OrdersChartData[]>([]);
+  const [stocksChartData, setStocksChartData] = useState<StocksChartData[]>([]);
 
   // Fetch products with inventory (1-to-1)
   const fetchProducts = useCallback(async () => {
@@ -410,6 +416,66 @@ const AdminDashboard = () => {
     }
   }, [toast]);
 
+  // Fetch orders chart data (last 6 months)
+  const fetchOrdersChartData = useCallback(async () => {
+    try {
+      const data = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+
+        const { data: orders } = await supabase
+          .from("orders")
+          .select("id", { count: "exact" })
+          .gte("created_at", startOfMonth.toISOString())
+          .lte("created_at", endOfMonth.toISOString());
+
+        data.push({
+          month: startOfMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          orders: orders?.length || 0,
+        });
+      }
+      setOrdersChartData(data);
+    } catch (error) {
+      console.error("Error fetching orders chart data:", error);
+    }
+  }, []);
+
+  // Fetch stocks chart data (by category)
+  const fetchStocksChartData = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select(`
+          category,
+          inventory (
+            quantity
+          )
+        `)
+        .eq("status", "active");
+
+      if (error) throw error;
+
+      const categoryStocks: { [key: string]: number } = {};
+      data?.forEach((product: { category: string; inventory: { quantity: number } | null }) => {
+        const category = product.category || "Uncategorized";
+        const stock = product.inventory?.quantity || 0;
+        categoryStocks[category] = (categoryStocks[category] || 0) + stock;
+      });
+
+      const chartData = Object.entries(categoryStocks).map(([category, stock]) => ({
+        category,
+        stock,
+      }));
+
+      setStocksChartData(chartData);
+    } catch (error) {
+      console.error("Error fetching stocks chart data:", error);
+    }
+  }, []);
+
   // Handle product actions
   const handleArchiveProduct = (productId: string) => {
     setProductToArchive(productId);
@@ -537,6 +603,8 @@ const AdminDashboard = () => {
       fetchFeaturedCollections();
       fetchAvailableProducts();
       fetchRecentOrders();
+      fetchOrdersChartData();
+      fetchStocksChartData();
     }
   }, [
     userRole,
@@ -545,6 +613,8 @@ const AdminDashboard = () => {
     fetchFeaturedCollections,
     fetchAvailableProducts,
     fetchRecentOrders,
+    fetchOrdersChartData,
+    fetchStocksChartData,
   ]);
 
   return (
@@ -589,6 +659,77 @@ const AdminDashboard = () => {
               </Card>
             );
           })}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 mb-8">
+          {/* Orders Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-charcoal text-lg sm:text-xl">
+                Orders Over Time
+              </CardTitle>
+              <CardDescription>Monthly order trends for the last 6 months</CardDescription>
+            </CardHeader>
+             <CardContent>
+                 <ChartContainer
+                   config={{
+                     orders: {
+                       label: "Orders",
+                       color: "hsl(var(--chart-1))",
+                     },
+                   }}
+                   className="sm:w-[20px] md:w-[450px]"
+                 >
+                 <LineChart data={ordersChartData}>
+                   <XAxis dataKey="month" />
+                   <YAxis />
+                   <ChartTooltip content={<ChartTooltipContent />} />
+                   <Line
+                     type="monotone"
+                     dataKey="orders"
+                     stroke="var(--color-orders)"
+                     strokeWidth={2}
+                     dot={{ fill: "var(--color-orders)" }}
+                   />
+                 </LineChart>
+               </ChartContainer>
+             </CardContent>
+          </Card>
+
+          {/* Stocks Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-charcoal text-lg sm:text-xl">
+                Stock Levels by Category
+              </CardTitle>
+              <CardDescription>Current inventory levels across product categories</CardDescription>
+            </CardHeader>
+             <CardContent>
+                 <ChartContainer
+                   config={{
+                     stock: {
+                       label: "Stock",
+                       color: "hsl(var(--chart-2))",
+                     },
+                   }}
+                   className="sm:h-[20px] md:h-[250px]"
+                 >
+                 <BarChart data={stocksChartData}>
+                    <XAxis
+                      dataKey="category"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                    />
+                   <YAxis />
+                   <ChartTooltip content={<ChartTooltipContent />} />
+                   <Bar dataKey="stock" fill="var(--color-stock)" />
+                 </BarChart>
+               </ChartContainer>
+             </CardContent>
+          </Card>
         </div>
 
         {/* Orders + Products */}
