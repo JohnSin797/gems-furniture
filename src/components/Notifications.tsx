@@ -33,6 +33,7 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
     markAllAsRead,
     unreadCount,
     deleteNotification,
+    deleteAllNotifications,
     fetchNotifications,
   } = useNotifications();
 
@@ -80,6 +81,17 @@ const Notifications: React.FC<NotificationsProps> = ({ isOpen, onClose }) => {
                 aria-label="Mark all notifications as read"
               >
                 Mark all read
+              </Button>
+            )}
+            {notifications.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={deleteAllNotifications}
+                className="text-xs text-destructive hover:text-destructive"
+                aria-label="Delete all notifications"
+              >
+                Delete all
               </Button>
             )}
           </div>

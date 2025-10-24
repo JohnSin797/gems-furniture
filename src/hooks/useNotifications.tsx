@@ -96,6 +96,15 @@ export const useNotifications = () => {
     }
   }, []);
 
+  const deleteAllNotifications = useCallback(async () => {
+    notifyAll([]);
+    try {
+      await supabase.from("notifications").delete().eq("user_id", user?.id);
+    } catch (err) {
+      console.error("Error deleting all notifications:", err);
+    }
+  }, [user]);
+
   const createNotification = useCallback(
     async (userId: string, title: string, message: string, type: NotificationType = "info") => {
       try {
@@ -133,6 +142,7 @@ export const useNotifications = () => {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    deleteAllNotifications,
     createNotification,
   };
 };
