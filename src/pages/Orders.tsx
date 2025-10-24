@@ -197,41 +197,52 @@ const Orders = () => {
         setActiveOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
       }
 
-      // Determine notification message
-      const notificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
-        pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
-        confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
-        to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
-        delivered: { title: "Order Delivered", message: `Your order ${order.order_number} has been delivered.`, type: "success" },
-        received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
-        cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "error" },
-      };
+       // Determine notification message for user
+       const userNotificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
+         pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
+         confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
+         to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
+         delivered: { title: "Order Delivered", message: `Your order ${order.order_number} has been delivered.`, type: "success" },
+         received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
+         cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "error" },
+       };
 
-      const notif = notificationsByStatus[newStatus];
-      if (!notif) return;
+       // Determine notification message for admin
+       const adminNotificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
+         pending: { title: "Order Pending", message: `Order ${order.order_number} is pending (Customer ID: ${order.user_id}).`, type: "info" },
+         confirmed: { title: "Order Confirmed", message: `Order ${order.order_number} has been confirmed (Customer ID: ${order.user_id}).`, type: "success" },
+         to_deliver: { title: "Order Ready for Delivery", message: `Order ${order.order_number} is ready for delivery (Customer ID: ${order.user_id}).`, type: "info" },
+         delivered: { title: "Order Delivered", message: `Order ${order.order_number} has been delivered (Customer ID: ${order.user_id}).`, type: "success" },
+         received: { title: "Order Received", message: `Order ${order.order_number} has been received (Customer ID: ${order.user_id}).`, type: "success" },
+         cancelled: { title: "Order Cancelled", message: `Order ${order.order_number} has been cancelled (Customer ID: ${order.user_id}).`, type: "error" },
+       };
 
-      // Send notification to the user
-      await createNotification(order.user_id, notif.title, notif.message, notif.type);
+       const userNotif = userNotificationsByStatus[newStatus];
+       const adminNotif = adminNotificationsByStatus[newStatus];
+       if (!userNotif || !adminNotif) return;
 
-      // Fetch all admin users (to include current admin too)
-      const { data: adminRoles, error: adminError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin');
+       // Send notification to the user
+       await createNotification(order.user_id, userNotif.title, userNotif.message, userNotif.type);
 
-      if (adminError) console.warn('Admin fetch error:', adminError);
+       // Fetch all admin users (to include current admin too)
+       const { data: adminRoles, error: adminError } = await supabase
+         .from('user_roles')
+         .select('user_id')
+         .eq('role', 'admin');
 
-      const admins = adminRoles?.map(r => r.user_id) ?? [];
+       if (adminError) console.warn('Admin fetch error:', adminError);
 
-      // Admin also gets the same notification
-      const adminNotifications = admins.map(adminId => ({
-        user_id: adminId,
-        title: notif.title,
-        message: notif.message + ` (User: ${order.user_id})`,
-        type: notif.type,
-      }));
+       const admins = adminRoles?.map(r => r.user_id) ?? [];
 
-      await supabase.from('notifications').insert(adminNotifications);
+       // Admin gets properly addressed notification
+       const adminNotifications = admins.map(adminId => ({
+         user_id: adminId,
+         title: adminNotif.title,
+         message: adminNotif.message,
+         type: adminNotif.type,
+       }));
+
+       await supabase.from('notifications').insert(adminNotifications);
 
       toast({
         title: "Status Updated",
