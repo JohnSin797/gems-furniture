@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import PurchaseModal from "./PurchaseModal";
@@ -19,12 +20,13 @@ interface ProductCardProps {
 const ProductCard = ({ id, name, price, originalPrice, image, category, quantity = 0 }: ProductCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const { user, userRole } = useAuth();
   const { addToCart } = useCart();
 
   const handleBuyNow = () => {
     if (!user) {
-      // This should be handled in the modal, but keeping for consistency
+      navigate('/auth');
       return;
     }
     setIsModalOpen(true);
@@ -32,7 +34,7 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
 
   const handleAddToCart = async () => {
     if (!user) {
-      // Handle unauthenticated user - could redirect to login
+      navigate('/auth');
       return;
     }
     try {

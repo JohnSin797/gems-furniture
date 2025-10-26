@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, MapPin } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,6 +46,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
     province: "",
     zip_code: "",
   });
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const { createNotification } = useNotifications();
@@ -130,11 +132,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
 
   const handleConfirmPurchase = () => {
     if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to make a purchase.",
-        variant: "destructive"
-      });
+      navigate('/auth');
       return;
     }
 

@@ -38,14 +38,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/products"
-              element={
-                <ProtectedRoute requireAuth>
-                  <Products />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/products" element={<Products />} />
             <Route
               path="/cart"
               element={
