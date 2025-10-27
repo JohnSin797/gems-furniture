@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,7 +18,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ id, name, price, originalPrice, image, category, quantity = 0 }: ProductCardProps) => {
-  const [isLiked, setIsLiked] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { user, userRole } = useAuth();
@@ -65,16 +65,7 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
             </span>
           </div>
         )}
-        
-        {/* Heart icon */}
-        <button 
-          onClick={() => setIsLiked(!isLiked)}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white"
-        >
-          <Heart 
-            className={`h-4 w-4 transition-colors ₱{isLiked ? 'fill-terracotta text-terracotta' : 'text-charcoal'}`} 
-          />
-        </button>
+
 
         {/* Action buttons */}
         {userRole !== 'admin' && quantity > 0 && (
