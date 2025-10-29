@@ -203,7 +203,7 @@ const Navigation = () => {
 
           <div className="flex items-center space-x-2 sm:space-x-6">
                <Link to="/products" className="text-white hover:text-sage-light transition-colors hidden md:block">Products</Link>
-              {user && <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">Orders</Link>}
+               {user && <Link to="/orders" className="text-white hover:text-sage-light transition-colors hidden md:block">Orders</Link>}
                {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Dashboard</Link>}
 
              <Button variant="ghost" size="sm" className="relative p-2 h-10 w-10 rounded-full hover:bg-terracotta/10" onClick={() => navigate('/cart')}>
