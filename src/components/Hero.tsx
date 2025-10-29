@@ -1,4 +1,4 @@
-import heroImage from "@/assets/hero-furniture.jpg";
+import heroImage from "@/assets/gems-furniture-landing-page-img.jpg";
 
 const Hero = () => {
   return (

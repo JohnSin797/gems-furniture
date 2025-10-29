@@ -34,7 +34,7 @@ All colors MUST be HSL.
 
     --border: 30 10% 88%;
     --input: 30 10% 88%;
-    --ring: 120 15% 45%;
+    --ring: 188 50% 40%; /* Teal */
 
     /* Custom furniture store colors */
     --sage: 120 15% 45%;
@@ -43,6 +43,7 @@ All colors MUST be HSL.
     --warm-gray: 25 10% 45%;
     --charcoal: 25 15% 15%;
     --terracotta: 15 65% 65%;
+    --logo-bg: 151 42% 16%;
 
     /* Chart colors */
     --chart-1: 120 15% 45%;

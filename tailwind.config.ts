@@ -58,6 +58,7 @@ const config = {
         "warm-gray": "hsl(var(--warm-gray))",
         charcoal: "hsl(var(--charcoal))",
         terracotta: "hsl(var(--terracotta))",
+        "logo-bg": "hsl(var(--logo-bg))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

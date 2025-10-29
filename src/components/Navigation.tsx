@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import logo from "@/assets/gems-furniture-logo.jpg";
 
 const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -149,14 +150,14 @@ const Navigation = () => {
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === "Enter") handleSearch(); };
 
   return (
-    <nav className="bg-sage-light border-b border-border sticky top-0 z-50">
+    <nav className="text-white border-b border-border sticky top-0 z-50" style={{backgroundColor: '#1D3229'}}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex-shrink-0">
-            <Link to="/" className="text-2xl font-bold text-charcoal hover:text-sage transition-colors">
-              Gems Furniture
-            </Link>
-          </div>
+           <div className="flex-shrink-0">
+              <Link to="/" className="text-2xl font-bold text-white hover:text-sage-light transition-colors">
+                <img src={logo} alt="Gems Furniture" className="h-12 w-20" />
+             </Link>
+           </div>
 
             {userRole !== "admin" && (
               <div className="flex-1 max-w-xl mx-8 hidden sm:block">
@@ -201,7 +202,7 @@ const Navigation = () => {
             )}
 
           <div className="flex items-center space-x-2 sm:space-x-6">
-              <Link to="/products" className="text-foreground hover:text-sage transition-colors hidden md:block">Products</Link>
+               <Link to="/products" className="text-white hover:text-sage-light transition-colors hidden md:block">Products</Link>
               {user && <Link to="/orders" className="text-foreground hover:text-sage transition-colors hidden md:block">Orders</Link>}
                {userRole === "admin" && <Link to="/admin" className="text-foreground hover:text-sage transition-colors hidden md:block">Dashboard</Link>}
 
