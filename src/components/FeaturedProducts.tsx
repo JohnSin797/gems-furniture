@@ -4,6 +4,7 @@ import { useState } from "react";
 import ProductCard from "./ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { useBestSeller } from "@/hooks/useBestSeller";
 
 interface Product {
    id: string;
@@ -23,6 +24,7 @@ interface FeaturedProductsProps {
 
 const FeaturedProducts = ({ showViewAllButton = true, maxItems, showPagination = false }: FeaturedProductsProps) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const { data: bestSeller } = useBestSeller();
 
   const { data: featuredProducts, isLoading } = useQuery({
     queryKey: ['featuredProducts'],
@@ -107,7 +109,7 @@ const FeaturedProducts = ({ showViewAllButton = true, maxItems, showPagination =
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
-            <ProductCard key={product.id} {...product} />
+            <ProductCard key={product.id} {...product} isBestSeller={bestSeller?.id === product.id} />
           ))}
         </div>
 

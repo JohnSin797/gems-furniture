@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useBestSeller } from "@/hooks/useBestSeller";
 
 interface Product {
    id: string;
@@ -37,6 +38,7 @@ const Products = () => {
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [textSearchQuery, setTextSearchQuery] = useState("");
   const { userRole } = useAuth();
+  const { data: bestSeller } = useBestSeller();
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -168,7 +170,7 @@ const Products = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredProducts.map((product) => (
-             <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} description={product.description} />
+             <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} description={product.description} isBestSeller={bestSeller?.id === product.id} />
           ))}
         </div>
 

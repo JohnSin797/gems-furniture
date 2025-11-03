@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,9 +17,10 @@ interface ProductCardProps {
    category: string;
    quantity?: number;
    description?: string;
+   isBestSeller?: boolean;
 }
 
-const ProductCard = ({ id, name, price, originalPrice, image, category, quantity = 0, description }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, originalPrice, image, category, quantity = 0, description, isBestSeller = false }: ProductCardProps) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -58,6 +60,15 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
         
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+
+        {/* Best Seller Badge */}
+        {isBestSeller && (
+          <div className="absolute top-3 left-3 z-10">
+            <Badge className="bg-terracotta text-white font-semibold">
+              Best Seller
+            </Badge>
+          </div>
+        )}
 
         {/* Sold Out overlay */}
         {quantity === 0 && (
