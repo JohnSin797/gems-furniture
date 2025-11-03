@@ -12,6 +12,7 @@ interface Product {
    image: string;
    category: string;
    quantity: number;
+   description?: string;
 }
 
 interface FeaturedProductsProps {
@@ -37,6 +38,7 @@ const FeaturedProducts = ({ showViewAllButton = true, maxItems, showPagination =
             price,
             category,
             image_url,
+            description,
             inventory(quantity)
           )
         `)
@@ -50,6 +52,7 @@ const FeaturedProducts = ({ showViewAllButton = true, maxItems, showPagination =
           price: item.products.price,
           image: item.products.image_url || '/placeholder.svg',
           category: item.products.category,
+          description: item.products.description,
           quantity: item.products.inventory?.quantity || 0
         })).filter(product => product.quantity > 0) || [];
     }

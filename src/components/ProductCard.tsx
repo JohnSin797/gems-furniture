@@ -15,11 +15,13 @@ interface ProductCardProps {
    image: string;
    category: string;
    quantity?: number;
+   description?: string;
 }
 
-const ProductCard = ({ id, name, price, originalPrice, image, category, quantity = 0 }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, originalPrice, image, category, quantity = 0, description }: ProductCardProps) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const navigate = useNavigate();
   const { user, userRole } = useAuth();
   const { addToCart } = useCart();
@@ -96,6 +98,19 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
         <h3 className="text-lg font-semibold text-foreground mb-3 group-hover:text-sage transition-colors">
           {name}
         </h3>
+        {description && (
+          <p className="text-sm text-muted-foreground mb-3">
+            {isDescriptionExpanded ? description : `${description.slice(0, 100)}${description.length > 100 ? '...' : ''}`}
+            {(isDescriptionExpanded || (description && description.length > 100)) && (
+              <span
+                className="text-xs text-sage hover:text-sage-dark cursor-pointer ml-1"
+                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+              >
+                {isDescriptionExpanded ? 'Read Less' : 'Read More'}
+              </span>
+            )}
+          </p>
+        )}
         <div className="flex items-center gap-2">
            <span className="text-xl font-bold text-charcoal">₱{price}</span>
            {originalPrice && (

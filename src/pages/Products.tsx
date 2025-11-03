@@ -168,7 +168,7 @@ const Products = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredProducts.map((product) => (
-             <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} />
+             <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} description={product.description} />
           ))}
         </div>
 
