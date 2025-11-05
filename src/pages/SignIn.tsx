@@ -46,7 +46,7 @@ const SignIn = () => {
                 <input type="checkbox" id="remember" className="rounded" />
                 <Label htmlFor="remember" className="text-sm">Remember me</Label>
               </div>
-              <Link to="#" className="text-sm text-primary hover:underline">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                 Forgot password?
               </Link>
             </div>

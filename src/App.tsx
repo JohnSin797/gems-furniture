@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import Archive from "./pages/Archive";
 import Cart from "./pages/Cart";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
@@ -73,6 +74,7 @@ const App = () => (
               }
             />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* Legacy routes for backward compatibility */}
             <Route path="/signin" element={<Auth />} />
