@@ -336,10 +336,10 @@ const Orders = () => {
   const content = (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
             {userRole === 'admin' ? 'Orders' : 'My Orders'}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             {userRole === 'admin' ? 'View and manage all orders' : 'Track and manage your orders'}
           </p>
         </div>
@@ -374,92 +374,96 @@ const Orders = () => {
                 {activeOrders.map((order) => (
                <Card key={order.id} className="overflow-hidden">
                   <CardContent className="p-4">
-                   {/* Order Header */}
-                   <div className="flex flex-col sm:flex-row mb-4">
-                      <div className="flex items-center space-x-4 mr-10 mb-2 sm:mb-0">
-                        <div>
-                          <h3 className="font-semibold text-foreground">
-                            Order {order.order_number}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Placed on {format(new Date(order.created_at), 'MMM dd, yyyy')}
-                          </p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <span className="text-sm text-muted-foreground">Status:</span>
-                                 <Badge className={
-                                   order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                   order.status === 'confirmed' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                                   order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                                   order.status === 'delivered' ? 'bg-purple-100 text-purple-800 border-purple-200' :
-                                   order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
-                                   order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
-                                   'bg-gray-100 text-gray-800 border-gray-200'
-                                 }>
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                              </Badge>
-                               {userRole === 'admin' && order.status === 'pending' && (
-                                 <Button
-                                   size="sm"
-                                   onClick={() => updateOrderStatus(order.id, "confirmed")}
-                                 >
-                                   Confirm
-                                 </Button>
-                               )}
-                                {userRole === 'admin' && order.status === 'confirmed' && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => updateOrderStatus(order.id, "to_deliver")}
-                                  >
-                                    To Deliver
-                                  </Button>
-                                )}
-                                {userRole === 'admin' && order.status === 'to_deliver' && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => updateOrderStatus(order.id, "delivered")}
-                                  >
-                                    Mark Delivered
-                                  </Button>
-                                )}
-                                {userRole !== 'admin' && order.status === 'to_deliver' && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => updateOrderStatus(order.id, "received")}
-                                  >
-                                    Receive
-                                  </Button>
-                                )}
+                    {/* Order Header */}
+                    <div className="flex flex-col lg:flex-row mb-4">
+                       <div className="flex-1 mb-4 lg:mb-0 lg:mr-4">
+                         <div>
+                           <h3 className="font-semibold text-foreground text-lg">
+                             Order {order.order_number}
+                           </h3>
+                           <p className="text-sm text-muted-foreground">
+                             Placed on {format(new Date(order.created_at), 'MMM dd, yyyy')}
+                           </p>
+                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-2">
+                               <div className="flex items-center space-x-2">
+                                 <span className="text-sm text-muted-foreground">Status:</span>
+                                    <Badge className={
+                                      order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                      order.status === 'confirmed' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                                      order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                      order.status === 'delivered' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                                      order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
+                                      order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
+                                      'bg-gray-100 text-gray-800 border-gray-200'
+                                    }>
+                                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                 </Badge>
+                               </div>
+                               <div className="flex flex-wrap gap-2">
+                                 {userRole === 'admin' && order.status === 'pending' && (
+                                   <Button
+                                     size="sm"
+                                     onClick={() => updateOrderStatus(order.id, "confirmed")}
+                                   >
+                                     Confirm
+                                   </Button>
+                                 )}
+                                  {userRole === 'admin' && order.status === 'confirmed' && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => updateOrderStatus(order.id, "to_deliver")}
+                                    >
+                                      To Deliver
+                                    </Button>
+                                  )}
+                                  {userRole === 'admin' && order.status === 'to_deliver' && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => updateOrderStatus(order.id, "delivered")}
+                                    >
+                                      Mark Delivered
+                                    </Button>
+                                  )}
+                                  {userRole !== 'admin' && order.status === 'to_deliver' && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => updateOrderStatus(order.id, "received")}
+                                    >
+                                      Receive
+                                    </Button>
+                                  )}
+                               </div>
+                            </div>
+                         </div>
+                       </div>
+                       <div className="flex flex-col sm:flex-row gap-4 mb-4 lg:mb-0">
+                         <div className="grid grid-cols-3 gap-4 flex-1">
+                          <div className="text-center">
+                            <p className="text-xs sm:text-sm text-muted-foreground">Items</p>
+                            <p className="font-semibold text-sm sm:text-base">{order.order_items?.length || 0}</p>
+                          </div>
+                           <div className="text-center">
+                             <p className="text-xs sm:text-sm text-muted-foreground">Subtotal</p>
+                             <p className="font-semibold text-sm sm:text-base">₱{order.subtotal.toFixed(2)}</p>
+                           </div>
+                           <div className="text-center">
+                             <p className="text-xs sm:text-sm text-muted-foreground">Total</p>
+                             <p className="font-semibold text-sm sm:text-base">₱{order.total_amount.toFixed(2)}</p>
                            </div>
                         </div>
-                      </div>
-                      <div className="flex-1 flex justify-center mb-2 sm:mb-0 md:px-8 sm:px-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 w-full md:px-4 gap-2 sm:gap-4">
-                         <div>
-                           <p className="text-sm text-muted-foreground">Items</p>
-                           <p className="font-semibold">{order.order_items?.length || 0}</p>
-                         </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Subtotal</p>
-                            <p className="font-semibold">₱{order.subtotal.toFixed(2)}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Total</p>
-                            <p className="font-semibold">₱{order.total_amount.toFixed(2)}</p>
-                          </div>
+                        <div className="flex justify-center lg:justify-end">
+                          <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={() => toggleOrderDetails(order.id)}
+                           className="flex items-center space-x-1"
+                          >
+                           <Eye className="h-4 w-4" />
+                           <span className="text-sm">{expandedOrder === order.id ? 'Hide' : 'View'}</span>
+                         </Button>
                        </div>
-                     </div>
-                      <div className="flex items-center space-x-4">
-                        <Button
-                         variant="ghost"
-                         size="sm"
-                         onClick={() => toggleOrderDetails(order.id)}
-                         className="flex items-center space-x-1"
-                       >
-                         <Eye className="h-4 w-4" />
-                         <span>{expandedOrder === order.id ? 'Hide' : 'View'} Details</span>
-                       </Button>
-                     </div>
-                   </div>
+                      </div>
+                    </div>
 
                    {/* Order Details */}
                    {expandedOrder === order.id && (
@@ -491,26 +495,28 @@ const Orders = () => {
                        )}
                        <div>
                          <h4 className="font-semibold mb-4">Order Items</h4>
-                        <div className="space-y-3">
-                          {order.order_items?.map((item) => (
-                            <div key={item.id} className="flex items-center space-x-4 p-3 bg-muted/30 rounded-lg">
-                              <img
-                                src={item.product_image || '/placeholder.svg'}
-                                alt={item.product_name}
-                                className="w-16 h-16 object-cover rounded-md"
-                              />
-                              <div className="flex-1">
-                                <h5 className="font-medium text-foreground">{item.product_name}</h5>
-                                <p className="text-sm text-muted-foreground">
-                                  Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-semibold">₱{item.total_price.toFixed(2)}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                         <div className="space-y-3">
+                           {order.order_items?.map((item) => (
+                             <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                               <div className="flex items-center gap-3 flex-1">
+                                 <img
+                                   src={item.product_image || '/placeholder.svg'}
+                                   alt={item.product_name}
+                                   className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md flex-shrink-0"
+                                 />
+                                 <div className="flex-1 min-w-0">
+                                   <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.product_name}</h5>
+                                   <p className="text-xs sm:text-sm text-muted-foreground">
+                                     Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
+                                   </p>
+                                 </div>
+                               </div>
+                               <div className="text-left sm:text-right">
+                                 <p className="font-semibold text-sm sm:text-base">₱{item.total_price.toFixed(2)}</p>
+                               </div>
+                             </div>
+                           ))}
+                         </div>
                       </div>
                     </>
                   )}
@@ -545,58 +551,58 @@ const Orders = () => {
                  {orderHistory.map((order) => (
                    <Card key={order.id} className="overflow-hidden">
                      <CardContent className="p-4">
-                       {/* Order Header */}
-                       <div className="flex flex-col sm:flex-row mb-4">
-                         <div className="flex items-center space-x-4 mr-10 mb-2 sm:mb-0">
-                           <div>
-                             <h3 className="font-semibold text-foreground">
-                               Order {order.order_number}
-                             </h3>
-                             <p className="text-sm text-muted-foreground">
-                               Placed on {format(new Date(order.created_at), 'MMM dd, yyyy')}
-                             </p>
-                             <div className="flex items-center space-x-2 mt-1">
-                               <span className="text-sm text-muted-foreground">Status:</span>
-                                 <Badge className={
-                                   order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
-                                   order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
-                                   order.status === 'delivered' ? 'bg-purple-100 text-purple-800 border-purple-200' :
-                                   order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                                   'bg-gray-100 text-gray-800 border-gray-200'
-                                 }>
-                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                               </Badge>
-                             </div>
-                           </div>
-                         </div>
-                         <div className="flex-1 flex justify-center mb-2 sm:mb-0 md:px-8 sm:px-4">
-                           <div className="grid grid-cols-3 w-full md:px-4 gap-4">
-                             <div>
-                               <p className="text-sm text-muted-foreground">Items</p>
-                               <p className="font-semibold">{order.order_items?.length || 0}</p>
-                             </div>
-                             <div>
-                               <p className="text-sm text-muted-foreground">Subtotal</p>
-                               <p className="font-semibold">₱{order.subtotal.toFixed(2)}</p>
-                             </div>
-                             <div>
-                               <p className="text-sm text-muted-foreground">Total</p>
-                               <p className="font-semibold">₱{order.total_amount.toFixed(2)}</p>
-                             </div>
-                           </div>
-                         </div>
-                         <div className="flex items-center space-x-4">
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => toggleOrderDetails(order.id)}
-                             className="flex items-center space-x-1"
-                           >
-                             <Eye className="h-4 w-4" />
-                             <span>{expandedOrder === order.id ? 'Hide' : 'View'} Details</span>
-                           </Button>
-                         </div>
-                       </div>
+                        {/* Order Header */}
+                        <div className="flex flex-col lg:flex-row mb-4">
+                          <div className="flex-1 mb-4 lg:mb-0 lg:mr-4">
+                            <div>
+                              <h3 className="font-semibold text-foreground text-lg">
+                                Order {order.order_number}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                Placed on {format(new Date(order.created_at), 'MMM dd, yyyy')}
+                              </p>
+                              <div className="flex items-center space-x-2 mt-2">
+                                <span className="text-sm text-muted-foreground">Status:</span>
+                                  <Badge className={
+                                    order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
+                                    order.status === 'received' ? 'bg-green-100 text-green-800 border-green-200' :
+                                    order.status === 'delivered' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                                    order.status === 'to_deliver' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                    'bg-gray-100 text-gray-800 border-gray-200'
+                                  }>
+                                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-4 mb-4 lg:mb-0">
+                            <div className="grid grid-cols-3 gap-4 flex-1">
+                              <div className="text-center">
+                                <p className="text-xs sm:text-sm text-muted-foreground">Items</p>
+                                <p className="font-semibold text-sm sm:text-base">{order.order_items?.length || 0}</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-xs sm:text-sm text-muted-foreground">Subtotal</p>
+                                <p className="font-semibold text-sm sm:text-base">₱{order.subtotal.toFixed(2)}</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-xs sm:text-sm text-muted-foreground">Total</p>
+                                <p className="font-semibold text-sm sm:text-base">₱{order.total_amount.toFixed(2)}</p>
+                              </div>
+                            </div>
+                            <div className="flex justify-center lg:justify-end">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleOrderDetails(order.id)}
+                                className="flex items-center space-x-1"
+                              >
+                                <Eye className="h-4 w-4" />
+                                <span className="text-sm">{expandedOrder === order.id ? 'Hide' : 'View'}</span>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
 
                         {/* Order Details */}
                         {expandedOrder === order.id && (
@@ -628,26 +634,28 @@ const Orders = () => {
                             )}
                             <div>
                               <h4 className="font-semibold mb-4">Order Items</h4>
-                             <div className="space-y-3">
-                               {order.order_items?.map((item) => (
-                                 <div key={item.id} className="flex items-center space-x-4 p-3 bg-muted/30 rounded-lg">
-                                   <img
-                                     src={item.product_image || '/placeholder.svg'}
-                                     alt={item.product_name}
-                                     className="w-16 h-16 object-cover rounded-md"
-                                   />
-                                   <div className="flex-1">
-                                     <h5 className="font-medium text-foreground">{item.product_name}</h5>
-                                     <p className="text-sm text-muted-foreground">
-                                       Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
-                                     </p>
-                                   </div>
-                                   <div className="text-right">
-                                     <p className="font-semibold">₱{item.total_price.toFixed(2)}</p>
-                                   </div>
-                                 </div>
-                               ))}
-                             </div>
+                              <div className="space-y-3">
+                                {order.order_items?.map((item) => (
+                                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                                    <div className="flex items-center gap-3 flex-1">
+                                      <img
+                                        src={item.product_image || '/placeholder.svg'}
+                                        alt={item.product_name}
+                                        className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md flex-shrink-0"
+                                      />
+                                      <div className="flex-1 min-w-0">
+                                        <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.product_name}</h5>
+                                        <p className="text-xs sm:text-sm text-muted-foreground">
+                                          Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="text-left sm:text-right">
+                                      <p className="font-semibold text-sm sm:text-base">₱{item.total_price.toFixed(2)}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                            </div>
                          </>
                        )}
