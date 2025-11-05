@@ -224,49 +224,52 @@ export type Database = {
         }
         Relationships: []
       }
-       profiles: {
-         Row: {
-           barangay: string | null
-           city: string | null
-           created_at: string
-           email: string | null
-           first_name: string | null
-           id: string
-           last_name: string | null
-           province: string | null
-           street_address: string | null
-           updated_at: string
-           user_id: string
-           zip_code: string | null
-         }
-         Insert: {
-           barangay?: string | null
-           city?: string | null
-           created_at?: string
-           email?: string | null
-           first_name?: string | null
-           id?: string
-           last_name?: string | null
-           province?: string | null
-           street_address?: string | null
-           updated_at?: string
-           user_id: string
-           zip_code?: string | null
-         }
-         Update: {
-           barangay?: string | null
-           city?: string | null
-           created_at?: string
-           email?: string | null
-           first_name?: string | null
-           id?: string
-           last_name?: string | null
-           province?: string | null
-           street_address?: string | null
-           updated_at?: string
-           user_id?: string
-           zip_code?: string | null
-         }
+        profiles: {
+          Row: {
+            barangay: string | null
+            city: string | null
+            created_at: string
+            email: string | null
+            first_name: string | null
+            id: string
+            last_name: string | null
+            phone_number: string | null
+            province: string | null
+            street_address: string | null
+            updated_at: string
+            user_id: string
+            zip_code: string | null
+          }
+          Insert: {
+            barangay?: string | null
+            city?: string | null
+            created_at?: string
+            email?: string | null
+            first_name?: string | null
+            id?: string
+            last_name?: string | null
+            phone_number?: string | null
+            province?: string | null
+            street_address?: string | null
+            updated_at?: string
+            user_id: string
+            zip_code?: string | null
+          }
+          Update: {
+            barangay?: string | null
+            city?: string | null
+            created_at?: string
+            email?: string | null
+            first_name?: string | null
+            id?: string
+            last_name?: string | null
+            phone_number?: string | null
+            province?: string | null
+            street_address?: string | null
+            updated_at?: string
+            user_id?: string
+            zip_code?: string | null
+          }
          Relationships: []
        }
        cart: {

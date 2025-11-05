@@ -28,16 +28,24 @@ interface OrderItem {
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
 interface Order {
-   id: string;
-   order_number: string;
-   status: OrderStatus;
-   total_amount: number;
-   subtotal: number;
-   shipping_amount: number;
-   created_at: string;
-   user_id: string;
-   order_items: OrderItem[];
- }
+    id: string;
+    order_number: string;
+    status: OrderStatus;
+    total_amount: number;
+    subtotal: number;
+    shipping_amount: number;
+    created_at: string;
+    user_id: string;
+    order_items: OrderItem[];
+    profiles?: {
+      phone_number: string | null;
+      street_address: string | null;
+      barangay: string | null;
+      city: string | null;
+      province: string | null;
+      zip_code: string | null;
+    } | null;
+  }
 
 const Orders = () => {
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
@@ -69,7 +77,28 @@ const Orders = () => {
       const { data: ordersData, error: ordersError } = await query;
 
       if (ordersError) throw ordersError;
-      setActiveOrders(ordersData || []);
+
+      // Fetch profiles for the orders
+      const userIds = ordersData?.map(order => order.user_id) || [];
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, phone_number, street_address, barangay, city, province, zip_code')
+          .in('user_id', userIds);
+
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+        }
+
+        // Merge profiles with orders
+        const ordersWithProfiles = ordersData?.map(order => ({
+          ...order,
+          profiles: profilesData?.find(profile => profile.user_id === order.user_id) || null
+        })) || [];
+        setActiveOrders(ordersWithProfiles);
+      } else {
+        setActiveOrders(ordersData || []);
+      }
     } catch (error) {
       console.error('Error fetching active orders:', error);
       toast({
@@ -106,8 +135,28 @@ const Orders = () => {
         throw ordersError;
       }
 
-      // if no data, just set empty array (no toast)
-      setOrderHistory(ordersData ?? []);
+      // Fetch profiles for the orders
+      const userIds = ordersData?.map(order => order.user_id) || [];
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, phone_number, street_address, barangay, city, province, zip_code')
+          .in('user_id', userIds);
+
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+        }
+
+        // Merge profiles with orders
+        const ordersWithProfiles = ordersData?.map(order => ({
+          ...order,
+          profiles: profilesData?.find(profile => profile.user_id === order.user_id) || null
+        })) || [];
+        setOrderHistory(ordersWithProfiles);
+      } else {
+        // if no data, just set empty array (no toast)
+        setOrderHistory(ordersData ?? []);
+      }
     } catch (error) {
       console.error('Error fetching order history:', error);
 
@@ -412,12 +461,36 @@ const Orders = () => {
                      </div>
                    </div>
 
-                  {/* Order Details */}
-                  {expandedOrder === order.id && (
-                    <>
-                      <Separator className="my-4" />
-                      <div>
-                        <h4 className="font-semibold mb-4">Order Items</h4>
+                   {/* Order Details */}
+                   {expandedOrder === order.id && (
+                     <>
+                       <Separator className="my-4" />
+                       {userRole === 'admin' && order.profiles && (
+                         <div className="mb-6">
+                           <h4 className="font-semibold mb-4">Customer Information</h4>
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                             <div>
+                               <p className="text-sm text-muted-foreground">Phone Number</p>
+                               <p className="font-medium">{order.profiles.phone_number || 'Not provided'}</p>
+                             </div>
+                             <div>
+                               <p className="text-sm text-muted-foreground">Address</p>
+                               <div className="font-medium">
+                                 {order.profiles.street_address && <p>{order.profiles.street_address}</p>}
+                                 {order.profiles.barangay && <p>Barangay {order.profiles.barangay}</p>}
+                                 {order.profiles.city && <p>{order.profiles.city}</p>}
+                                 {order.profiles.province && <p>{order.profiles.province}</p>}
+                                 {order.profiles.zip_code && <p>{order.profiles.zip_code}</p>}
+                                 {!order.profiles.street_address && !order.profiles.barangay && !order.profiles.city && !order.profiles.province && !order.profiles.zip_code && (
+                                   <p>Not provided</p>
+                                 )}
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                       <div>
+                         <h4 className="font-semibold mb-4">Order Items</h4>
                         <div className="space-y-3">
                           {order.order_items?.map((item) => (
                             <div key={item.id} className="flex items-center space-x-4 p-3 bg-muted/30 rounded-lg">
@@ -525,12 +598,36 @@ const Orders = () => {
                          </div>
                        </div>
 
-                       {/* Order Details */}
-                       {expandedOrder === order.id && (
-                         <>
-                           <Separator className="my-4" />
-                           <div>
-                             <h4 className="font-semibold mb-4">Order Items</h4>
+                        {/* Order Details */}
+                        {expandedOrder === order.id && (
+                          <>
+                            <Separator className="my-4" />
+                            {userRole === 'admin' && order.profiles && (
+                              <div className="mb-6">
+                                <h4 className="font-semibold mb-4">Customer Information</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Phone Number</p>
+                                    <p className="font-medium">{order.profiles.phone_number || 'Not provided'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Address</p>
+                                    <div className="font-medium">
+                                      {order.profiles.street_address && <p>{order.profiles.street_address}</p>}
+                                      {order.profiles.barangay && <p>Barangay {order.profiles.barangay}</p>}
+                                      {order.profiles.city && <p>{order.profiles.city}</p>}
+                                      {order.profiles.province && <p>{order.profiles.province}</p>}
+                                      {order.profiles.zip_code && <p>{order.profiles.zip_code}</p>}
+                                      {!order.profiles.street_address && !order.profiles.barangay && !order.profiles.city && !order.profiles.province && !order.profiles.zip_code && (
+                                        <p>Not provided</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            <div>
+                              <h4 className="font-semibold mb-4">Order Items</h4>
                              <div className="space-y-3">
                                {order.order_items?.map((item) => (
                                  <div key={item.id} className="flex items-center space-x-4 p-3 bg-muted/30 rounded-lg">

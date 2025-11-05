@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Calendar, MapPin } from "lucide-react";
+import { User, Mail, Calendar, MapPin, Phone } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +16,7 @@ interface ProfileData {
   id: string;
   first_name: string | null;
   last_name: string | null;
+  phone_number: string | null;
   street_address: string | null;
   barangay: string | null;
   city: string | null;
@@ -28,6 +29,7 @@ const Profile = () => {
   const [updating, setUpdating] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [address, setAddress] = useState({
     street: "",
     barangay: "",
@@ -60,6 +62,7 @@ const Profile = () => {
       if (data) {
         setProfileData(data);
         setFullName(`${data.first_name || ''} ${data.last_name || ''}`.trim());
+        setPhoneNumber(data.phone_number || "");
         setAddress({
           street: data.street_address || "",
           barangay: data.barangay || "",
@@ -70,6 +73,7 @@ const Profile = () => {
       } else {
         // Profile doesn't exist yet, set defaults
         setFullName(user?.user_metadata?.full_name || "");
+        setPhoneNumber(user?.user_metadata?.phone_number || "");
         setAddress({
           street: user?.user_metadata?.address?.street || "",
           barangay: user?.user_metadata?.address?.barangay || "",
@@ -109,6 +113,7 @@ const Profile = () => {
       const profileUpdate = {
         first_name: firstName,
         last_name: lastName,
+        phone_number: phoneNumber || null,
         street_address: address.street || null,
         barangay: address.barangay || null,
         city: address.city || null,
@@ -252,30 +257,39 @@ const Profile = () => {
                   <span>Personal Information</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      value={user?.email || ""}
-                      disabled
-                      className="bg-muted"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Email cannot be changed
-                    </p>
-                  </div>
-                </div>
+               <CardContent className="space-y-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <Label htmlFor="fullName">Full Name</Label>
+                     <Input
+                       id="fullName"
+                       value={fullName}
+                       onChange={(e) => setFullName(e.target.value)}
+                       placeholder="Enter your full name"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <Label htmlFor="email">Email Address</Label>
+                     <Input
+                       id="email"
+                       value={user?.email || ""}
+                       disabled
+                       className="bg-muted"
+                     />
+                     <p className="text-xs text-muted-foreground">
+                       Email cannot be changed
+                     </p>
+                   </div>
+                   <div className="space-y-2">
+                     <Label htmlFor="phoneNumber">Phone Number</Label>
+                     <Input
+                       id="phoneNumber"
+                       value={phoneNumber}
+                       onChange={(e) => setPhoneNumber(e.target.value)}
+                       placeholder="Enter your phone number"
+                     />
+                   </div>
+                 </div>
 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <div className="space-y-2">
