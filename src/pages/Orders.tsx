@@ -297,25 +297,25 @@ const Orders = () => {
         setActiveOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
       }
 
-       // Determine notification message for user
-       const userNotificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
-         pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
-         confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
-         to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
-         delivered: { title: "Order Delivered", message: `Your order ${order.order_number} has been delivered.`, type: "success" },
-         received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
-         cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "error" },
-       };
+        // Determine notification message for user
+        const userNotificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
+          pending: { title: "Order Pending", message: `Your order ${order.order_number} is pending.`, type: "info" },
+          confirmed: { title: "Order Confirmed", message: `Your order ${order.order_number} has been confirmed.`, type: "success" },
+          to_deliver: { title: "Order Ready for Delivery", message: `Your order ${order.order_number} is ready for delivery.`, type: "info" },
+          delivered: { title: "Order Delivered", message: `Your order ${order.order_number} has been delivered.`, type: "success" },
+          received: { title: "Order Received", message: `Your order ${order.order_number} has been received.`, type: "success" },
+          cancelled: { title: "Order Cancelled", message: `Your order ${order.order_number} has been cancelled.`, type: "info" },
+        };
 
-       // Determine notification message for admin
-       const adminNotificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
-         pending: { title: "Order Pending", message: `Order ${order.order_number} is pending (Customer ID: ${order.user_id}).`, type: "info" },
-         confirmed: { title: "Order Confirmed", message: `Order ${order.order_number} has been confirmed (Customer ID: ${order.user_id}).`, type: "success" },
-         to_deliver: { title: "Order Ready for Delivery", message: `Order ${order.order_number} is ready for delivery (Customer ID: ${order.user_id}).`, type: "info" },
-         delivered: { title: "Order Delivered", message: `Order ${order.order_number} has been delivered (Customer ID: ${order.user_id}).`, type: "success" },
-         received: { title: "Order Received", message: `Order ${order.order_number} has been received (Customer ID: ${order.user_id}).`, type: "success" },
-         cancelled: { title: "Order Cancelled", message: `Order ${order.order_number} has been cancelled (Customer ID: ${order.user_id}).`, type: "error" },
-       };
+        // Determine notification message for admin
+        const adminNotificationsByStatus: Record<OrderStatus, { title: string; message: string; type: NotificationType }> = {
+          pending: { title: "Order Pending", message: `Order ${order.order_number} is pending (Customer ID: ${order.user_id}).`, type: "info" },
+          confirmed: { title: "Order Confirmed", message: `Order ${order.order_number} has been confirmed (Customer ID: ${order.user_id}).`, type: "success" },
+          to_deliver: { title: "Order Ready for Delivery", message: `Order ${order.order_number} is ready for delivery (Customer ID: ${order.user_id}).`, type: "info" },
+          delivered: { title: "Order Delivered", message: `Order ${order.order_number} has been delivered (Customer ID: ${order.user_id}).`, type: "success" },
+          received: { title: "Order Received", message: `Order ${order.order_number} has been received (Customer ID: ${order.user_id}).`, type: "success" },
+          cancelled: { title: "Order Cancelled", message: `Order ${order.order_number} has been cancelled (Customer ID: ${order.user_id}).`, type: "info" },
+        };
 
        const userNotif = userNotificationsByStatus[newStatus];
        const adminNotif = adminNotificationsByStatus[newStatus];
