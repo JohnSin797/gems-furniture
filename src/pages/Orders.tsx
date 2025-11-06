@@ -37,14 +37,16 @@ interface Order {
     created_at: string;
     user_id: string;
     order_items: OrderItem[];
-    profiles?: {
-      phone_number: string | null;
-      street_address: string | null;
-      barangay: string | null;
-      city: string | null;
-      province: string | null;
-      zip_code: string | null;
-    } | null;
+     profiles?: {
+       first_name: string | null;
+       last_name: string | null;
+       phone_number: string | null;
+       street_address: string | null;
+       barangay: string | null;
+       city: string | null;
+       province: string | null;
+       zip_code: string | null;
+     } | null;
   }
 
 const Orders = () => {
@@ -83,7 +85,7 @@ const Orders = () => {
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('user_id, phone_number, street_address, barangay, city, province, zip_code')
+          .select('user_id, first_name, last_name, phone_number, street_address, barangay, city, province, zip_code')
           .in('user_id', userIds);
 
         if (profilesError) {
@@ -140,7 +142,7 @@ const Orders = () => {
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('user_id, phone_number, street_address, barangay, city, province, zip_code')
+          .select('user_id, first_name, last_name, phone_number, street_address, barangay, city, province, zip_code')
           .in('user_id', userIds);
 
         if (profilesError) {
@@ -472,11 +474,19 @@ const Orders = () => {
                        {userRole === 'admin' && order.profiles && (
                          <div className="mb-6">
                            <h4 className="font-semibold mb-4">Customer Information</h4>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-                             <div>
-                               <p className="text-sm text-muted-foreground">Phone Number</p>
-                               <p className="font-medium">{order.profiles.phone_number || 'Not provided'}</p>
-                             </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                              <div>
+                                <p className="text-sm text-muted-foreground">Name</p>
+                                <p className="font-medium">
+                                  {order.profiles.first_name && order.profiles.last_name
+                                    ? `${order.profiles.first_name} ${order.profiles.last_name}`
+                                    : order.profiles.first_name || order.profiles.last_name || 'Not provided'}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Phone Number</p>
+                                <p className="font-medium">{order.profiles.phone_number || 'Not provided'}</p>
+                              </div>
                              <div>
                                <p className="text-sm text-muted-foreground">Address</p>
                                <div className="font-medium">
@@ -612,6 +622,14 @@ const Orders = () => {
                               <div className="mb-6">
                                 <h4 className="font-semibold mb-4">Customer Information</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Name</p>
+                                    <p className="font-medium">
+                                      {order.profiles.first_name && order.profiles.last_name
+                                        ? `${order.profiles.first_name} ${order.profiles.last_name}`
+                                        : order.profiles.first_name || order.profiles.last_name || 'Not provided'}
+                                    </p>
+                                  </div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">Phone Number</p>
                                     <p className="font-medium">{order.profiles.phone_number || 'Not provided'}</p>
