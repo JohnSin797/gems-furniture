@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Package, Eye } from "lucide-react";
+ import { Package, Eye, X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -244,6 +244,51 @@ const Orders = () => {
       const order = activeOrders.find(o => o.id === orderId);
       if (!order) return;
 
+      // Restore inventory when order is cancelled (if it was previously confirmed or to_deliver)
+      if (newStatus === 'cancelled' && (order.status === 'confirmed' || order.status === 'to_deliver')) {
+        // Fetch order items to get product quantities
+        const { data: orderItems, error: itemsError } = await supabase
+          .from('order_items')
+          .select('product_id, quantity')
+          .eq('order_id', orderId);
+
+        if (itemsError) {
+          console.error('Error fetching order items for inventory restoration:', itemsError);
+          // Continue with the rest of the function even if inventory update fails
+        } else if (orderItems) {
+          // Update inventory for each product
+          for (const item of orderItems) {
+            // First fetch current inventory
+            const { data: currentInventory, error: fetchError } = await supabase
+              .from('inventory')
+              .select('quantity')
+              .eq('product_id', item.product_id)
+              .single();
+
+            if (fetchError) {
+              console.error(`Error fetching inventory for product ${item.product_id}:`, fetchError);
+              continue;
+            }
+
+            if (currentInventory) {
+              const newQuantity = currentInventory.quantity + item.quantity;
+              const { error: inventoryError } = await supabase
+                .from('inventory')
+                .update({
+                  quantity: newQuantity,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('product_id', item.product_id);
+
+              if (inventoryError) {
+                console.error(`Error restoring inventory for product ${item.product_id}:`, inventoryError);
+                // Continue with other items even if one fails
+              }
+            }
+          }
+        }
+      }
+
       // Update local state reactively
       if (['delivered', 'received', 'cancelled'].includes(newStatus) || (userRole === 'admin' && newStatus === 'to_deliver')) {
         setActiveOrders(prev => prev.filter(o => o.id !== orderId));
@@ -459,14 +504,26 @@ const Orders = () => {
                                       Mark Delivered
                                     </Button>
                                   )}
-                                  {userRole !== 'admin' && order.status === 'to_deliver' && (
-                                    <Button
-                                      size="sm"
-                                      onClick={() => updateOrderStatus(order.id, "received")}
-                                    >
-                                      Receive
-                                    </Button>
-                                  )}
+                                   {userRole !== 'admin' && order.status === 'to_deliver' && (
+                                     <Button
+                                       size="sm"
+                                       onClick={() => updateOrderStatus(order.id, "received")}
+                                     >
+                                       Receive
+                                     </Button>
+                                   )}
+                                   {userRole !== 'admin' && (
+                                     <Button
+                                       size="sm"
+                                       variant="destructive"
+                                       onClick={() => updateOrderStatus(order.id, "cancelled")}
+                                       disabled={order.status === 'to_deliver'}
+                                       className="flex items-center space-x-1"
+                                     >
+                                       <X className="h-4 w-4" />
+                                       <span>Cancel</span>
+                                     </Button>
+                                   )}
                                </div>
                             </div>
                          </div>
