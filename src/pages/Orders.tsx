@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, subDays } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 import type { NotificationType } from "@/hooks/useNotifications";
+import type { Json } from "@/integrations/supabase/types";
 
 interface OrderItem {
   id: string;
@@ -28,26 +29,27 @@ interface OrderItem {
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
 interface Order {
-    id: string;
-    order_number: string;
-    status: OrderStatus;
-    total_amount: number;
-    subtotal: number;
-    shipping_amount: number;
-    created_at: string;
-    user_id: string;
-    order_items: OrderItem[];
-     profiles?: {
-       first_name: string | null;
-       last_name: string | null;
-       phone_number: string | null;
-       street_address: string | null;
-       barangay: string | null;
-       city: string | null;
-       province: string | null;
-       zip_code: string | null;
-     } | null;
-  }
+     id: string;
+     order_number: string;
+     status: OrderStatus;
+     total_amount: number;
+     subtotal: number;
+     shipping_amount: number;
+     created_at: string;
+     user_id: string;
+     shipping_address: Json | null;
+     order_items: OrderItem[];
+      profiles?: {
+        first_name: string | null;
+        last_name: string | null;
+        phone_number: string | null;
+        street_address: string | null;
+        barangay: string | null;
+        city: string | null;
+        province: string | null;
+        zip_code: string | null;
+      } | null;
+   }
 
 const Orders = () => {
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
@@ -66,6 +68,7 @@ const Orders = () => {
         .from('orders')
         .select(`
           *,
+          shipping_address,
           order_items (*)
         `)
         .in('status', activeStatuses)
@@ -119,6 +122,7 @@ const Orders = () => {
         .from('orders')
         .select(`
           *,
+          shipping_address,
           order_items (*)
         `)
         .in('status', historyStatuses)
@@ -314,6 +318,35 @@ const Orders = () => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
   };
 
+  const formatShippingAddress = (shippingAddress: Json | null, profiles: Order['profiles']) => {
+    let addr: { street?: string; barangay?: string; city?: string; province?: string; zip_code?: string };
+
+    if (shippingAddress) {
+      addr = shippingAddress as { street?: string; barangay?: string; city?: string; province?: string; zip_code?: string };
+    } else if (profiles) {
+      // Use personal address as fallback
+      addr = {
+        street: profiles.street_address || undefined,
+        barangay: profiles.barangay || undefined,
+        city: profiles.city || undefined,
+        province: profiles.province || undefined,
+        zip_code: profiles.zip_code || undefined,
+      };
+    } else {
+      return "No shipping address provided";
+    }
+
+    const parts = [
+      addr.street,
+      addr.barangay,
+      addr.city,
+      addr.province,
+      addr.zip_code
+    ].filter(Boolean);
+
+    return parts.length > 0 ? parts.join(", ") : "No shipping address provided";
+  };
+
   useEffect(() => {
     if (user) {
       fetchAllOrders();
@@ -487,19 +520,12 @@ const Orders = () => {
                                 <p className="text-sm text-muted-foreground">Phone Number</p>
                                 <p className="font-medium">{order.profiles.phone_number || 'Not provided'}</p>
                               </div>
-                             <div>
-                               <p className="text-sm text-muted-foreground">Address</p>
-                               <div className="font-medium">
-                                 {order.profiles.street_address && <p>{order.profiles.street_address}</p>}
-                                 {order.profiles.barangay && <p>Barangay {order.profiles.barangay}</p>}
-                                 {order.profiles.city && <p>{order.profiles.city}</p>}
-                                 {order.profiles.province && <p>{order.profiles.province}</p>}
-                                 {order.profiles.zip_code && <p>{order.profiles.zip_code}</p>}
-                                 {!order.profiles.street_address && !order.profiles.barangay && !order.profiles.city && !order.profiles.province && !order.profiles.zip_code && (
-                                   <p>Not provided</p>
-                                 )}
-                               </div>
-                             </div>
+                                 <div>
+                                   <p className="text-sm text-muted-foreground">Shipping Address</p>
+                                   <div className="font-medium">
+                                     <p>{formatShippingAddress(order.shipping_address, order.profiles)}</p>
+                                   </div>
+                                 </div>
                            </div>
                          </div>
                        )}
@@ -634,19 +660,12 @@ const Orders = () => {
                                     <p className="text-sm text-muted-foreground">Phone Number</p>
                                     <p className="font-medium">{order.profiles.phone_number || 'Not provided'}</p>
                                   </div>
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Address</p>
-                                    <div className="font-medium">
-                                      {order.profiles.street_address && <p>{order.profiles.street_address}</p>}
-                                      {order.profiles.barangay && <p>Barangay {order.profiles.barangay}</p>}
-                                      {order.profiles.city && <p>{order.profiles.city}</p>}
-                                      {order.profiles.province && <p>{order.profiles.province}</p>}
-                                      {order.profiles.zip_code && <p>{order.profiles.zip_code}</p>}
-                                      {!order.profiles.street_address && !order.profiles.barangay && !order.profiles.city && !order.profiles.province && !order.profiles.zip_code && (
-                                        <p>Not provided</p>
-                                      )}
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">Shipping Address</p>
+                                      <div className="font-medium">
+                                        <p>{formatShippingAddress(order.shipping_address, order.profiles)}</p>
+                                      </div>
                                     </div>
-                                  </div>
                                 </div>
                               </div>
                             )}
