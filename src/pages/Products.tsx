@@ -101,6 +101,16 @@ const Products = () => {
         case "price-low": filtered.sort((a, b) => a.price - b.price); break;
         case "price-high": filtered.sort((a, b) => b.price - a.price); break;
         case "newest": filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); break;
+        case "featured":
+          filtered.sort((a, b) => {
+            // Prioritize in-stock products (quantity > 0) first
+            if ((a.quantity > 0) !== (b.quantity > 0)) {
+              return a.quantity > 0 ? -1 : 1;
+            }
+            // Then sort by newest
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
+          break;
         default: break;
       }
 
@@ -180,9 +190,20 @@ const Products = () => {
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-foreground mb-4">You might also like</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allProducts.filter(p => !filteredProducts.some(fp => fp.id === p.id)).slice(0, 6).map((product) => (
-                <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} description={product.description} isBestSeller={bestSeller?.id === product.id} />
-              ))}
+              {allProducts
+                .filter(p => !filteredProducts.some(fp => fp.id === p.id))
+                .sort((a, b) => {
+                  // Prioritize in-stock products first
+                  if ((a.quantity > 0) !== (b.quantity > 0)) {
+                    return a.quantity > 0 ? -1 : 1;
+                  }
+                  // Then sort by newest
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                })
+                .slice(0, 6)
+                .map((product) => (
+                  <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} description={product.description} isBestSeller={bestSeller?.id === product.id} />
+                ))}
             </div>
           </div>
         )}
