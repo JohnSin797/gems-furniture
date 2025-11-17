@@ -37,6 +37,7 @@ const Products = () => {
   const [textSearchActive, setTextSearchActive] = useState(false);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [textSearchQuery, setTextSearchQuery] = useState("");
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const { userRole } = useAuth();
   const { data: bestSeller } = useBestSeller();
 
@@ -71,10 +72,11 @@ const Products = () => {
 
   // Handle navigation state
   useEffect(() => {
-    const state = location.state as { imageSearchResults?: Product[]; searchTerms?: string[]; searchQuery?: string; matchingProducts?: Product[] } | null;
+    const state = location.state as { imageSearchResults?: Product[]; searchTerms?: string[]; searchQuery?: string; matchingProducts?: Product[]; allProducts?: Product[] } | null;
     if (state?.imageSearchResults) {
       setFilteredProducts(state.imageSearchResults);
       setSearchTerms(state.searchTerms || []);
+      setAllProducts(state.allProducts || []);
       setImageSearchActive(true);
       setTextSearchActive(false);
       toast({ title: "Image search results", description: `Showing ${state.imageSearchResults.length} products` });
@@ -173,6 +175,17 @@ const Products = () => {
              <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} description={product.description} isBestSeller={bestSeller?.id === product.id} />
           ))}
         </div>
+
+        {imageSearchActive && allProducts.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-foreground mb-4">You might also like</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allProducts.filter(p => !filteredProducts.some(fp => fp.id === p.id)).slice(0, 6).map((product) => (
+                <ProductCard key={product.id} id={product.id} name={product.name} price={product.price} image={product.image_url || '/placeholder.svg'} category={product.category} quantity={product.quantity} description={product.description} isBestSeller={bestSeller?.id === product.id} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {filteredProducts.length === 0 && <div className="text-center py-12"><p className="text-muted-foreground">No products found matching your criteria.</p></div>}
       </main>

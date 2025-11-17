@@ -87,12 +87,13 @@ const Navigation = () => {
     const dataResp = await res.json();
     console.log("Image search response:", dataResp);
 
-    const { searchTerms, matchingProducts } = dataResp;
+    const { searchTerms, matchingProducts, allProducts } = dataResp;
 
     navigate("/products", {
       state: {
         imageSearchResults: matchingProducts || [],
         searchTerms: searchTerms || [],
+        allProducts: allProducts || [],
       },
     });
 
