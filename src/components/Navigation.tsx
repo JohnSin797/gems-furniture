@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, Menu, X, Search, Camera, Bell, User, LogOut } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, Camera, Bell, User, LogOut, Upload, ImageIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -17,10 +17,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import logo from "@/assets/gems-furniture-logo.jpg";
 
 const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
   const { totalItems } = useCart();
@@ -29,9 +36,20 @@ const Navigation = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [imageSearchDialogOpen, setImageSearchDialogOpen] = useState(false);
   const { unreadCount } = useNotifications();
 
   const handleCameraClick = () => {
+    setImageSearchDialogOpen(true);
+  };
+
+  const handleTakePicture = () => {
+    setImageSearchDialogOpen(false);
+    if (cameraInputRef.current) cameraInputRef.current.click();
+  };
+
+  const handleUploadImage = () => {
+    setImageSearchDialogOpen(false);
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
@@ -193,6 +211,13 @@ const Navigation = () => {
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
+                    className="hidden"
+                    onChange={handleImageCapture}
+                  />
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
                     capture="environment"
                     className="hidden"
                     onChange={handleImageCapture}
@@ -268,17 +293,32 @@ const Navigation = () => {
                        >
                          <Search className="h-4 w-4" />
                        </Button>
-                       <Button
-                         variant="ghost"
-                         size="sm"
-                         className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                         onClick={handleCameraClick}
-                         disabled={isProcessingImage}
-                       >
-                         <Camera className={`h-4 w-4 ${isProcessingImage ? "animate-pulse" : ""}`} />
-                       </Button>
-                     </div>
-                   )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute bg-sage-light right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                          onClick={handleCameraClick}
+                          disabled={isProcessingImage}
+                        >
+                          <Camera className={`h-4 w-4 ${isProcessingImage ? "animate-pulse" : ""}`} />
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageCapture}
+                        />
+                        <input
+                          ref={cameraInputRef}
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          className="hidden"
+                          onChange={handleImageCapture}
+                        />
+                      </div>
+                    )}
 
                    {/* Mobile Navigation Links */}
                    <div className="flex flex-col space-y-4">
@@ -345,6 +385,33 @@ const Navigation = () => {
         </div>
       </div>
       <Notifications isOpen={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+
+      <Dialog open={imageSearchDialogOpen} onOpenChange={setImageSearchDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Search by Image</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Button
+              onClick={handleTakePicture}
+              className="flex items-center gap-2"
+              disabled={isProcessingImage}
+            >
+              <Camera className="h-4 w-4" />
+              Take Picture
+            </Button>
+            <Button
+              onClick={handleUploadImage}
+              variant="outline"
+              className="flex items-center gap-2"
+              disabled={isProcessingImage}
+            >
+              <Upload className="h-4 w-4" />
+              Upload Image
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 };
