@@ -160,17 +160,17 @@ const Navigation = () => {
            </div>
 
             {userRole !== "admin" && (
-              <div className="flex-1 max-w-xl mx-8 hidden sm:block">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search products..."
-                    className="w-full pl-10 pr-12"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                  />
+               <div className="flex-1 max-w-xl mx-8 hidden sm:block">
+                 <div className="relative">
+                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search products..."
+                      className="w-full pl-10 pr-12 text-charcoal"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
+                    />
                   <Button
                     variant="ghost"
                     size="sm"
@@ -247,18 +247,18 @@ const Navigation = () => {
                </SheetTrigger>
                <SheetContent side="right" className="w-80">
                  <div className="flex flex-col space-y-6 mt-6">
-                   {/* Mobile Search */}
-                   {userRole !== "admin" && (
-                     <div className="relative">
-                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input
-                         type="text"
-                         placeholder="Search products..."
-                         className="w-full pl-10 pr-12"
-                         value={searchQuery}
-                         onChange={(e) => setSearchQuery(e.target.value)}
-                         onKeyDown={handleSearchKeyDown}
-                       />
+                    {/* Mobile Search */}
+                    {userRole !== "admin" && (
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search products..."
+                      className="w-full pl-10 pr-12 text-charcoal"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
+                    />
                        <Button
                          variant="ghost"
                          size="sm"
