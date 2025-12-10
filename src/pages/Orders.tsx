@@ -16,6 +16,7 @@ import { format, subDays } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 import type { NotificationType } from "@/hooks/useNotifications";
 import type { Json } from "@/integrations/supabase/types";
+import { formatPrice } from "@/lib/utils";
 
 interface OrderItem {
   id: string;
@@ -597,16 +598,16 @@ const Orders = () => {
                                    alt={item.product_name}
                                    className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md flex-shrink-0"
                                  />
-                                 <div className="flex-1 min-w-0">
-                                   <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.product_name}</h5>
-                                   <p className="text-xs sm:text-sm text-muted-foreground">
-                                     Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
-                                   </p>
-                                 </div>
-                               </div>
-                               <div className="text-left sm:text-right">
-                                 <p className="font-semibold text-sm sm:text-base">₱{item.total_price.toFixed(2)}</p>
-                               </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.product_name}</h5>
+                                    <p className="text-xs sm:text-sm text-muted-foreground">
+                                      Quantity: {item.quantity} × {formatPrice(item.unit_price)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-left sm:text-right">
+                                  <p className="font-semibold text-sm sm:text-base">{formatPrice(item.total_price)}</p>
+                                </div>
                              </div>
                            ))}
                          </div>
@@ -737,16 +738,16 @@ const Orders = () => {
                                         alt={item.product_name}
                                         className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md flex-shrink-0"
                                       />
-                                      <div className="flex-1 min-w-0">
-                                        <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.product_name}</h5>
-                                        <p className="text-xs sm:text-sm text-muted-foreground">
-                                          Quantity: {item.quantity} × ₱{item.unit_price.toFixed(2)}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <div className="text-left sm:text-right">
-                                      <p className="font-semibold text-sm sm:text-base">₱{item.total_price.toFixed(2)}</p>
-                                    </div>
+                                       <div className="flex-1 min-w-0">
+                                         <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.product_name}</h5>
+                                         <p className="text-xs sm:text-sm text-muted-foreground">
+                                           Quantity: {item.quantity} × {formatPrice(item.unit_price)}
+                                         </p>
+                                       </div>
+                                     </div>
+                                     <div className="text-left sm:text-right">
+                                       <p className="font-semibold text-sm sm:text-base">{formatPrice(item.total_price)}</p>
+                                     </div>
                                   </div>
                                 ))}
                               </div>

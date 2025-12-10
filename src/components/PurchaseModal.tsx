@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import { formatPrice } from "@/lib/utils";
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -304,7 +305,7 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
             />
             <div>
               <h3 className="font-semibold">{product.name}</h3>
-              <p className="text-sm text-muted-foreground">₱{product.price}</p>
+              <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
             </div>
           </div>
 
@@ -453,13 +454,13 @@ const PurchaseModal = ({ isOpen, onClose, product }: PurchaseModalProps) => {
             <h4 className="font-semibold">Order Summary</h4>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <span>Subtotal ({quantity} × ₱{product.price})</span>
-                <span>₱{subtotal.toFixed(2)}</span>
+                <span>Subtotal ({quantity} × {formatPrice(product.price)})</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>₱{total.toFixed(2)}</span>
+                <span>{formatPrice(total)}</span>
               </div>
             </div>
           </div>

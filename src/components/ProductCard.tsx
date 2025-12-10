@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import PurchaseModal from "./PurchaseModal";
+import { formatPrice } from "@/lib/utils";
 
 interface ProductCardProps {
    id: string;
@@ -123,9 +124,9 @@ const ProductCard = ({ id, name, price, originalPrice, image, category, quantity
           </p>
         )}
         <div className="flex items-center gap-2">
-           <span className="text-xl font-bold text-charcoal">₱{price}</span>
+           <span className="text-xl font-bold text-charcoal">{formatPrice(price)}</span>
            {originalPrice && (
-             <span className="text-lg text-muted-foreground line-through">₱{originalPrice}</span>
+             <span className="text-lg text-muted-foreground line-through">{formatPrice(originalPrice)}</span>
            )}
          </div>
          <div className="text-sm text-muted-foreground">

@@ -14,6 +14,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { formatPrice } from "@/lib/utils";
 
 interface AddressData {
   street_address: string | null;
@@ -386,10 +387,10 @@ const Cart = () => {
                         alt={item.product_name}
                         className="w-20 h-20 object-cover rounded-md"
                       />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-charcoal">{item.product_name}</h3>
-                        <p className="text-sm text-muted-foreground">₱{item.unit_price}</p>
-                      </div>
+                       <div className="flex-1">
+                         <h3 className="font-semibold text-charcoal">{item.product_name}</h3>
+                         <p className="text-sm text-muted-foreground">{formatPrice(item.unit_price)}</p>
+                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
@@ -408,8 +409,8 @@ const Cart = () => {
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-charcoal">₱{item.total_price.toFixed(2)}</p>
+                       <div className="text-right">
+                         <p className="font-semibold text-charcoal">{formatPrice(item.total_price)}</p>
                         <Button
                           variant="ghost"
                           size="sm"

@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import type { Database } from "@/integrations/supabase/types";
+import { formatPrice } from "@/lib/utils";
 
 export interface ArchivedProduct {
   id: string;
@@ -195,7 +196,7 @@ const Archive = () => {
                               <div className="text-sm text-muted-foreground">{product.category}</div>
                             </div>
                           </TableCell>
-                          <TableCell>₱{product.price}</TableCell>
+                           <TableCell>{formatPrice(product.price)}</TableCell>
                           <TableCell>{product.inventory?.[0]?.quantity || 0}</TableCell>
                           <TableCell>
                             {new Date(product.created_at).toLocaleDateString()}
@@ -239,10 +240,10 @@ const Archive = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Price:</span>
-                            <p className="font-medium">₱{product.price}</p>
-                          </div>
+                           <div>
+                             <span className="text-muted-foreground">Price:</span>
+                             <p className="font-medium">{formatPrice(product.price)}</p>
+                           </div>
                           <div>
                             <span className="text-muted-foreground">Stock:</span>
                             <p className="font-medium">{product.inventory?.[0]?.quantity || 0}</p>

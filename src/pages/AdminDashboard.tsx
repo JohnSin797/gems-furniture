@@ -47,6 +47,7 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { AddStockDialog } from "@/components/AddStockDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
+import { formatPrice } from "@/lib/utils";
 
 export interface ProductWithInventory {
   id: string;
@@ -839,7 +840,7 @@ const AdminDashboard = () => {
                                    </div>
                                  </div>
                                </TableCell>
-                             <TableCell>₱{product.price}</TableCell>
+                              <TableCell>{formatPrice(product.price)}</TableCell>
                              <TableCell>
                                {product.inventory?.quantity ?? 0}
                              </TableCell>
@@ -954,7 +955,7 @@ const AdminDashboard = () => {
                             </div>
                           </TableCell>
                          <TableCell className="hidden sm:table-cell">{fc.products?.category ?? "Unknown"}</TableCell>
-                         <TableCell>₱{fc.products?.price ?? "N/A"}</TableCell>
+                          <TableCell>{fc.products?.price ? formatPrice(fc.products.price) : "N/A"}</TableCell>
                          <TableCell className="text-center">
                            <Button
                              variant="outline"
